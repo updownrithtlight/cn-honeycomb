@@ -33,7 +33,8 @@ your-project/
 │   ├── 06_CREATE_PRODUCT_PAGES.md
 │   ├── 07_SEO_TECH_FILES.md
 │   ├── 08_DEPLOYMENT.md
-│   └── 09_QA_AND_DELIVERY.md
+│   ├── 09_QA_AND_DELIVERY.md
+│   └── 10_PRODUCTION_READINESS.md
 ```
 
 每次只让 Codex 执行一个任务文件。
@@ -115,6 +116,16 @@ your-project/
 请读取 codex-tasks/00_PROJECT_BRIEF.md 和 codex-tasks/09_QA_AND_DELIVERY.md。
 本轮做最终自检、构建测试、SEO检查、死链检查和交付报告。
 发现问题请修复，并说明修改了哪些文件。
+```
+
+## 第 10 次
+
+```txt
+请读取 codex-tasks/00_PROJECT_BRIEF.md 和 codex-tasks/10_PRODUCTION_READINESS.md。
+本轮按 P0、P1、P2 顺序将展示型站点完善为生产级独立站。
+先完成移动端、正式素材、真实询盘、企业资料核验和法务内容等 P0 项。
+不得编造证书、测试数据、客户案例或备案号。
+每项修改后执行对应验收，最后输出生产上线报告。
 ```
 
 如果 Codex 报错，把报错原文复制出来，再让 ChatGPT 帮你改下一轮提示词。
