@@ -1,0 +1,314 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroCarousel from "../components/HeroCarousel.astro";
+import ProductCard from "../components/ProductCard.astro";
+import ApplicationCard from "../components/ApplicationCard.astro";
+import ParameterTable from "../components/ParameterTable.astro";
+import FAQ from "../components/FAQ.astro";
+import CTASection from "../components/CTASection.astro";
+import NewsCard from "../components/NewsCard.astro";
+import { products } from "../data/products";
+import { commonFaqs } from "../data/faqs";
+import { pageSEO } from "../data/seo";
+import { inquiryFields } from "../data/site";
+import { companyProfile } from "../data/company";
+import { newsItems } from "../data/news";
+import { heroSlides } from "../data/home";
+
+const coreProducts = products.filter((product) =>
+  [
+    "emi-shielded-honeycomb-vent",
+    "waveguide-honeycomb-vent",
+    "stainless-steel-honeycomb-core",
+    "airflow-straightener",
+    "wind-tunnel-honeycomb",
+    "honeycomb-seal"
+  ].includes(product.slug)
+);
+
+const customRows = [
+  { label: "材质", value: "SS304、SS316、SS316L、铝、铜、黄铜、碳钢、镍基合金等。" },
+  { label: "孔径与箔厚", value: "孔径 / Cell Size、箔厚 / Foil Thickness 可按图纸或样品沟通。" },
+  { label: "蜂窝厚度", value: "蜂窝厚度 / Depth 根据应用、安装空间和结构要求确认。" },
+  { label: "外形与边框", value: "支持矩形、圆形、异形结构以及边框、固定孔位和装配方式沟通。" },
+  { label: "表面处理", value: "可结合材料和应用要求沟通表面处理方式。" },
+  { label: "图纸定制", value: "建议提供图纸、草图、样品照片或关键参数。" }
+];
+
+const processSteps = [
+  ["应用场景", "说明屏蔽、通风、整流、风洞、密封或降噪等使用场景。"],
+  ["图纸参数", "提供材质、孔径、箔厚、厚度、外形尺寸、边框结构等信息。"],
+  ["材料结构", "沟通材料、焊接、表面处理、安装方式和测试要求。"],
+  ["报价交期", "结合数量、加工难度和交付地评估报价与周期。"],
+  ["生产交付", "根据确认方案安排样品、生产和交付沟通。"]
+];
+---
+<BaseLayout title={pageSEO.home.title} description={pageSEO.home.description} canonical={pageSEO.home.canonical}>
+  <HeroCarousel slides={heroSlides} />
+
+  <section class="section section--muted">
+    <div class="container proof-grid">
+      <div class="section-head proof-head">
+        <p class="eyebrow">Company Capability</p>
+        <h2 class="section-title">研发、制造、销售一体的金属蜂窝企业</h2>
+        <p class="section-lead">恒实蜂窝自 {companyProfile.foundedYear} 年创立，拥有 {companyProfile.productionBase}，主营电磁屏蔽、风洞试验、航空航天发动机及燃气轮机相关金属蜂窝。</p>
+      </div>
+      <div class="proof-cards">
+        <article><strong>{companyProfile.foundedYear}</strong><span>公司创立</span></article>
+        <article><strong>5000㎡</strong><span>现代化生产基地</span></article>
+        <article><strong>AS9100</strong><span>航空航天质量体系</span></article>
+        <article><strong>GJB 9001C</strong><span>武器装备质量体系</span></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Core Products</p>
+        <h2 class="section-title">核心产品</h2>
+        <p class="section-lead">围绕屏蔽通风、金属蜂窝芯、气流整流、风洞测试和蜂窝密封建立清晰的产品入口。</p>
+      </div>
+      <div class="grid grid--3">
+        {coreProducts.map((product) => (
+          <ProductCard title={product.name} href={`/${product.slug}/`} description={product.description} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container custom-grid">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Custom Capability</p>
+          <h2 class="section-title">定制能力</h2>
+          <p class="section-lead">可围绕材质、孔径、箔厚、蜂窝厚度、外形尺寸、边框、表面处理和图纸定制沟通方案。</p>
+        </div>
+        <ParameterTable rows={customRows} />
+      </div>
+      <aside class="inquiry-card">
+        <h3>询价参数</h3>
+        <ul>
+          {inquiryFields.map((field) => <li>{field}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Applications</p>
+        <h2 class="section-title">应用领域</h2>
+      </div>
+      <div class="grid grid--3">
+        <ApplicationCard title="EMI屏蔽" description="屏蔽室、EMC测试室、屏蔽机柜、MRI屏蔽等通风与观察窗口。" />
+        <ApplicationCard title="通风散热" description="设备通风口、机柜散热和需要屏蔽兼顾的通风结构。" />
+        <ApplicationCard title="风洞测试" description="风洞、水洞和实验平台中的蜂窝整流结构。" />
+        <ApplicationCard title="流场整流" description="风机、管道、测试设备中的气流整理和流场稳定。" />
+        <ApplicationCard title="汽轮机密封" description="汽轮机、燃气轮机、压缩机相关蜂窝密封件。" />
+        <ApplicationCard title="工业降噪" description="工业设备通风、整流和降噪相关金属蜂窝结构。" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Why Hengshi</p>
+        <h2 class="section-title">为什么选择恒实蜂窝</h2>
+      </div>
+      <div class="grid grid--4 feature-grid">
+        <div><strong>支持定制</strong><span>围绕图纸、样品、材料和安装方式沟通加工方案。</span></div>
+        <div><strong>聚焦金属蜂窝</strong><span>覆盖屏蔽通风、蜂窝芯、整流、风洞和密封方向。</span></div>
+        <div><strong>按图纸沟通</strong><span>优先依据工程参数评估，不做脱离条件的承诺。</span></div>
+        <div><strong>工业工程应用</strong><span>面向采购、工程师、设备厂和设计院阅读。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Inquiry Process</p>
+        <h2 class="section-title">询价流程</h2>
+      </div>
+      <ol class="process-list">
+        {processSteps.map(([title, text]) => <li><strong>{title}</strong><span>{text}</span></li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Company News</p>
+        <h2 class="section-title">企业新闻</h2>
+        <p class="section-lead">查看恒实蜂窝参展和企业发展相关的可核实动态。</p>
+      </div>
+      <div class="grid grid--2">
+        {newsItems.slice(0, 2).map((item) => (
+          <NewsCard
+            title={item.title}
+            date={item.date}
+            excerpt={item.excerpt}
+            href={`/news/${item.slug}/`}
+          />
+        ))}
+      </div>
+      <div class="button-row">
+        <a class="button button--ghost" href="/news/">查看全部企业新闻</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">FAQ</p>
+        <h2 class="section-title">常见问题</h2>
+      </div>
+      <FAQ items={commonFaqs.slice(0, 4)} />
+    </div>
+  </section>
+
+  <CTASection title="有金属蜂窝定制需求？" lead="请提供应用场景、图纸参数、材料结构、数量和交付地，我们将根据项目要求沟通方案。" />
+</BaseLayout>
+
+<style>
+  .custom-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 34px;
+    align-items: start;
+  }
+
+  .proof-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 32px;
+    align-items: center;
+  }
+
+  .proof-head {
+    margin-bottom: 0;
+  }
+
+  .proof-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .proof-cards article {
+    display: grid;
+    gap: 6px;
+    min-height: 118px;
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .proof-cards strong {
+    color: var(--color-primary);
+    font-size: 28px;
+    line-height: 1.1;
+  }
+
+  .proof-cards span {
+    color: var(--color-muted);
+  }
+
+  .inquiry-card {
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .inquiry-card h3 {
+    margin: 0 0 14px;
+    color: var(--color-primary);
+    font-size: 21px;
+  }
+
+  .inquiry-card ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--color-muted);
+  }
+
+  .feature-grid > div,
+  .process-list li {
+    display: grid;
+    gap: 8px;
+    padding: 24px;
+  }
+
+  .feature-grid > div {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .feature-grid strong {
+    color: #fff;
+    font-size: 19px;
+  }
+
+  .feature-grid span {
+    color: rgba(255, 255, 255, 0.76);
+  }
+
+  .process-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .process-list li {
+    counter-increment: step;
+    border: 1px solid var(--color-border);
+    background: #fff;
+  }
+
+  .process-list li::before {
+    content: counter(step, decimal-leading-zero);
+    color: var(--color-accent-dark);
+    font-weight: 900;
+  }
+
+  .process-list strong {
+    color: var(--color-primary);
+    font-size: 18px;
+  }
+
+  .process-list span {
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 980px) {
+    .custom-grid,
+    .proof-grid,
+    .process-list {
+      grid-template-columns: 1fr;
+    }
+
+    .proof-cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .proof-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

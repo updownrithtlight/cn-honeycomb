@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import NewsCard from "../../components/NewsCard.astro";
+import CTASection from "../../components/CTASection.astro";
+import { newsItems } from "../../data/news";
+import { pageSEO } from "../../data/seo";
+---
+<BaseLayout title={pageSEO.news.title} description={pageSEO.news.description} canonical={pageSEO.news.canonical}>
+  <section class="section">
+    <div class="container">
+      <Breadcrumb items={[{ label: "企业新闻" }]} />
+      <div class="section-head page-head">
+        <p class="eyebrow">Company News</p>
+        <h1 class="section-title">企业新闻</h1>
+        <p class="section-lead">发布恒实蜂窝参展、制造能力和企业发展相关动态。内容以可核实资料为基础，不虚构客户案例、认证或测试数据。</p>
+      </div>
+      <div class="news-list">
+        {newsItems.map((item) => (
+          <NewsCard
+            title={item.title}
+            date={item.date}
+            excerpt={item.excerpt}
+            href={`/news/${item.slug}/`}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+  <CTASection title="了解恒实蜂窝产品与定制能力" lead="可查看产品中心，或提交材料、尺寸、图纸和应用场景进行询价沟通。" />
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-top: 24px;
+  }
+
+  .news-list {
+    display: grid;
+    gap: 18px;
+    max-width: 900px;
+  }
+</style>

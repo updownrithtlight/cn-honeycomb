@@ -1,0 +1,44 @@
+---
+const { title, date, excerpt, href } = Astro.props;
+---
+<article class="news-card">
+  <time datetime={date}>{date}</time>
+  <h3><a href={href}>{title}</a></h3>
+  <p>{excerpt}</p>
+  <a class="news-link" href={href}>阅读企业新闻</a>
+</article>
+
+<style>
+  .news-card {
+    display: grid;
+    gap: 12px;
+    padding: 26px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(11, 42, 74, 0.05);
+  }
+
+  time {
+    color: var(--color-accent-dark);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 22px;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .news-link {
+    color: var(--color-primary-light);
+    font-size: 14px;
+    font-weight: 800;
+  }
+</style>

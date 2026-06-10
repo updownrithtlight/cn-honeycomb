@@ -1,0 +1,356 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
+import ParameterTable from "../components/ParameterTable.astro";
+import FAQ from "../components/FAQ.astro";
+import ProductCard from "../components/ProductCard.astro";
+import CTASection from "../components/CTASection.astro";
+import { products, productsBySlug } from "../data/products";
+import { inquiryFields, performanceNotice, siteInfo } from "../data/site";
+
+const { slug } = Astro.props;
+const product = productsBySlug[slug];
+
+if (!product) {
+  throw new Error(`Product not found: ${slug}`);
+}
+
+const parameterRows = [
+  { label: "材质", value: product.materials.join("、") },
+  { label: "孔径 / Cell Size", value: "根据图纸、样品或项目要求沟通。" },
+  { label: "箔厚 / Foil Thickness", value: "根据材料、结构强度、加工工艺和应用环境确认。" },
+  { label: "蜂窝厚度 / Depth", value: "根据安装空间、结构需求和应用目标确认。" },
+  { label: "外形尺寸", value: "支持按图纸、草图、样品或关键尺寸沟通。" },
+  { label: "边框结构", value: "可沟通边框材料、固定孔位、密封方式和装配结构。" },
+  { label: "表面处理", value: "结合材料、使用环境和装配要求确认。" },
+  { label: "连接 / 焊接 / 钎焊方式", value: product.processes.join("、") },
+  { label: "典型应用", value: product.applications.join("、") },
+  { label: "是否支持按图纸定制", value: "支持。建议提供图纸、草图、样品照片和关键参数。" }
+];
+
+const defaultFaqs = [
+  {
+    question: `${product.name}是否可以按图纸定制？`,
+    answer: "可以。建议提供图纸、草图、样品照片、材料、尺寸、孔径、厚度、边框结构、数量和应用环境。"
+  },
+  {
+    question: `询价${product.name}需要提供哪些参数？`,
+    answer: `建议提供${inquiryFields.join("、")}。`
+  },
+  {
+    question: `${product.name}是否可以提供样品？`,
+    answer: "可根据项目要求、材料、结构和加工难度沟通样品或小批量试制安排。"
+  },
+  {
+    question: `${product.name}的性能如何确认？`,
+    answer: performanceNotice
+  }
+];
+
+const faqMap = new Map();
+[...product.faq, ...defaultFaqs].forEach((item) => {
+  if (!faqMap.has(item.question)) {
+    faqMap.set(item.question, item);
+  }
+});
+const faqs = Array.from(faqMap.values()).slice(0, 5);
+
+const relatedProducts = product.related
+  .map((relatedSlug) => productsBySlug[relatedSlug])
+  .filter(Boolean);
+
+const fallbackRelated = products
+  .filter((item) => item.slug !== product.slug && !relatedProducts.some((related) => related.slug === item.slug))
+  .slice(0, Math.max(0, 3 - relatedProducts.length));
+const relatedCards = [...relatedProducts, ...fallbackRelated].slice(0, 3);
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  description: product.description,
+  url: `${siteInfo.domain}${product.slug}/`,
+  image: `${siteInfo.domain}images/placeholder-metal-honeycomb.svg`,
+  brand: {
+    "@type": "Brand",
+    name: siteInfo.siteName
+  },
+  manufacturer: {
+    "@type": "Organization",
+    name: siteInfo.companyName,
+    url: siteInfo.domain
+  },
+  material: product.materials,
+  category: "金属蜂窝定制产品",
+  additionalProperty: [
+    {
+      "@type": "PropertyValue",
+      name: "典型应用",
+      value: product.applications.join("、")
+    },
+    {
+      "@type": "PropertyValue",
+      name: "工艺方式",
+      value: product.processes.join("、")
+    },
+    {
+      "@type": "PropertyValue",
+      name: "询价参数",
+      value: inquiryFields.join("、")
+    }
+  ]
+};
+---
+<BaseLayout title={product.title} description={product.description} canonical={`${siteInfo.domain}${product.slug}/`} jsonLd={[productJsonLd]}>
+  <section class="product-hero">
+    <div class="container">
+      <Breadcrumb items={[{ href: "/products/", label: "产品中心" }, { label: product.name }]} />
+      <div class="product-hero-grid">
+        <div>
+          <p class="eyebrow">Product Detail</p>
+          <h1>{product.h1}</h1>
+          <p>{product.description}</p>
+          <ul class="keyword-list" aria-label="产品关键词">
+            {product.keywords.slice(0, 4).map((keyword) => <li>{keyword}</li>)}
+          </ul>
+          <div class="button-row">
+            <a class="button" href="/contact/">提交询价参数</a>
+            <a class="button button--ghost" href="/products/">返回产品中心</a>
+          </div>
+        </div>
+        <figure>
+          <img src="/images/placeholder-metal-honeycomb.svg" alt={`${product.name}产品结构占位图`} loading="lazy" />
+          <figcaption>占位图：后续替换为{product.name}真实产品图片。</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container two-column">
+      <article>
+        <div class="section-head">
+          <p class="eyebrow">Overview</p>
+          <h2 class="section-title">产品概述</h2>
+          <p class="section-lead">{product.description}</p>
+        </div>
+        <p class="body-copy">
+          {product.name}面向工业工程项目，重点关注材料、结构尺寸、安装方式和应用环境。页面中的参数用于询价沟通和选型参考，具体加工方案需结合图纸、样品或项目要求确认。
+        </p>
+      </article>
+      <aside class="info-panel">
+        <h2>询价需要提供的信息</h2>
+        <ul>
+          {inquiryFields.map((field) => <li>{field}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Applications</p>
+        <h2 class="section-title">典型应用</h2>
+        <p class="section-lead">以下应用方向来自产品数据模型，后续可继续补充图片、图纸说明和选型文章。</p>
+      </div>
+      <div class="chip-grid">
+        {product.applications.map((item) => <span>{item}</span>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Materials</p>
+        <h2 class="section-title">可选材料</h2>
+      </div>
+      <div class="chip-grid">
+        {product.materials.map((item) => <span>{item}</span>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Processes</p>
+        <h2 class="section-title">工艺方式</h2>
+      </div>
+      <div class="chip-grid">
+        {product.processes.map((item) => <span>{item}</span>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Custom Parameters</p>
+        <h2 class="section-title">可定制参数表</h2>
+        <p class="section-lead">不填写未经确认的性能数值，性能相关内容统一结合测试条件和项目要求沟通。</p>
+      </div>
+      <ParameterTable rows={parameterRows} />
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Related Products</p>
+        <h2 class="section-title">相关产品</h2>
+      </div>
+      <div class="grid grid--3">
+        {relatedCards.map((item) => (
+          <ProductCard title={item.name} href={`/${item.slug}/`} description={item.description} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">FAQ</p>
+        <h2 class="section-title">常见问题</h2>
+      </div>
+      <FAQ items={faqs} />
+    </div>
+  </section>
+
+  <CTASection title={`咨询${product.name}定制`} lead="请提供用途、材质、孔径、箔厚、蜂窝厚度、外形尺寸、边框结构、图纸或草图、数量和测试要求。" />
+</BaseLayout>
+
+<style>
+  .product-hero {
+    padding: 42px 0 68px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-soft);
+  }
+
+  .product-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+    align-items: center;
+    gap: 42px;
+    margin-top: 30px;
+  }
+
+  h1 {
+    margin: 0 0 16px;
+    color: var(--color-primary);
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.16;
+    letter-spacing: 0;
+  }
+
+  p {
+    max-width: 760px;
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  figure {
+    margin: 0;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  figure img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  figcaption {
+    padding: 12px 14px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .keyword-list,
+  .chip-grid,
+  .info-panel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .keyword-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .keyword-list li,
+  .chip-grid span {
+    border: 1px solid var(--color-border);
+    background: #fff;
+    color: var(--color-muted);
+  }
+
+  .keyword-list li {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .two-column {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 34px;
+  }
+
+  .body-copy {
+    margin-top: 18px;
+  }
+
+  .info-panel {
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .info-panel h2 {
+    margin: 0 0 14px;
+    color: var(--color-primary);
+    font-size: 21px;
+  }
+
+  .info-panel ul {
+    display: grid;
+    gap: 10px;
+    color: var(--color-muted);
+  }
+
+  .info-panel li {
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .info-panel li:last-child {
+    border-bottom: 0;
+  }
+
+  .chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chip-grid span {
+    padding: 10px 13px;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .product-hero-grid,
+    .two-column {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

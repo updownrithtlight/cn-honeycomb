@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">金属蜂窝产品占位图</title>
+  <desc id="desc">用于产品系列轮播的本地占位图，后续应替换为真实产品图片。</desc>
+  <rect width="1200" height="820" fill="#0B2A4A"/>
+  <rect x="58" y="58" width="1084" height="704" fill="#123E68" stroke="#9CA3AF" stroke-width="4"/>
+  <g fill="none" stroke="#F59E0B" stroke-width="8" opacity="0.92">
+    <path d="M245 170h120l60 104-60 104H245l-60-104 60-104Z"/>
+    <path d="M425 170h120l60 104-60 104H425l-60-104 60-104Z"/>
+    <path d="M605 170h120l60 104-60 104H605l-60-104 60-104Z"/>
+    <path d="M785 170h120l60 104-60 104H785l-60-104 60-104Z"/>
+    <path d="M335 326h120l60 104-60 104H335l-60-104 60-104Z"/>
+    <path d="M515 326h120l60 104-60 104H515l-60-104 60-104Z"/>
+    <path d="M695 326h120l60 104-60 104H695l-60-104 60-104Z"/>
+  </g>
+  <text x="90" y="690" fill="#FFFFFF" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="44" font-weight="700">Hengshi Honeycomb</text>
+  <text x="90" y="740" fill="#D1D5DB" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="24">Replace with real product image</text>
+</svg>

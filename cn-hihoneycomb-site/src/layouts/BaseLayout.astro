@@ -1,0 +1,72 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import SEOHead from "../components/SEOHead.astro";
+import { defaultSEO } from "../data/seo";
+import { siteInfo } from "../data/site";
+
+const {
+  title = defaultSEO.title,
+  description = defaultSEO.description,
+  canonical = defaultSEO.canonical,
+  jsonLd = [],
+  alternateEn = siteInfo.englishSite
+} = Astro.props;
+
+const pageName = title.split("|")[0].split("｜")[0].trim();
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteInfo.companyName,
+  alternateName: [siteInfo.siteName, siteInfo.brandEnglish],
+  url: siteInfo.domain,
+  telephone: siteInfo.phone,
+  email: siteInfo.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: siteInfo.address,
+    addressCountry: "CN"
+  },
+  sameAs: [siteInfo.englishSite]
+};
+
+const breadcrumbItems = [
+  {
+    "@type": "ListItem",
+    position: 1,
+    name: "首页",
+    item: siteInfo.domain
+  }
+];
+
+if (canonical !== siteInfo.domain) {
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: 2,
+    name: pageName,
+    item: canonical
+  });
+}
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbItems
+};
+
+const structuredData = [organizationJsonLd, breadcrumbJsonLd, ...jsonLd];
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <SEOHead title={title} description={description} canonical={canonical} structuredData={structuredData} alternateEn={alternateEn} />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

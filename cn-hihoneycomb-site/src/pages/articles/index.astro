@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import { pageSEO } from "../../data/seo";
+---
+<BaseLayout title={pageSEO.articles.title} description={pageSEO.articles.description} canonical={pageSEO.articles.canonical}>
+  <section class="section">
+    <div class="container">
+      <Breadcrumb items={[{ label: "技术资料" }]} />
+      <p class="eyebrow">Articles</p>
+      <h1 class="section-title">技术资料</h1>
+      <p class="section-lead">预留技术文章列表，用于后续承接产品选型、材料工艺、应用说明和 SEO 长尾内容。</p>
+    </div>
+  </section>
+</BaseLayout>

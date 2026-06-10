@@ -1,0 +1,9 @@
+services:
+  cn-hihoneycomb-site:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cn-hihoneycomb-site
+    ports:
+      - "8088:80"
+    restart: unless-stopped

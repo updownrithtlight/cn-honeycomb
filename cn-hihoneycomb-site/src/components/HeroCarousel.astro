@@ -1,0 +1,364 @@
+---
+import type { HeroSlide } from "../data/home";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+const { slides = [] } = Astro.props as { slides: HeroSlide[] };
+const fallbackImage = "/images/placeholders/product-placeholder.svg";
+const resolveImage = (image: string) => {
+  const imagePath = join(process.cwd(), "public", image.replace(/^\//, ""));
+  return existsSync(imagePath) ? image : fallbackImage;
+};
+const resolvedSlides = slides.map((slide) => ({
+  ...slide,
+  resolvedImage: resolveImage(slide.image)
+}));
+---
+<section class="hero-carousel" data-hero-carousel data-interval="5000">
+  <div class="container carousel-shell">
+    <div class="carousel-copy">
+      <p class="eyebrow">Hengshi Honeycomb</p>
+      <h1>金属蜂窝定制厂家</h1>
+      <p class="hero-summary">面向 EMI/RFI 屏蔽、气流整流、风洞测试、蜂窝密封和屏蔽视窗等工业应用，提供金属蜂窝定制产品。</p>
+    </div>
+
+    <div class="carousel-frame" aria-roledescription="carousel" aria-label="首页产品系列轮播">
+      <div class="slides">
+        {resolvedSlides.map((slide, index) => (
+          <article class={`slide ${index === 0 ? "is-active" : ""}`} data-slide aria-hidden={index === 0 ? "false" : "true"}>
+            <div class="slide-content">
+              <p class="slide-index">{String(index + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</p>
+              <h2>{slide.title}</h2>
+              <p>{slide.description}</p>
+              <a class="button" href={slide.href}>{slide.cta}</a>
+            </div>
+            <figure>
+              <img
+                src={slide.resolvedImage}
+                data-fallback={fallbackImage}
+                alt={slide.imageAlt}
+                width="1200"
+                height="820"
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </figure>
+          </article>
+        ))}
+      </div>
+
+      <div class="carousel-controls" aria-label="轮播控制">
+        <button class="arrow" type="button" data-prev aria-label="上一张">‹</button>
+        <div class="dots" role="tablist" aria-label="选择产品系列">
+          {slides.map((slide, index) => (
+            <button
+              class={index === 0 ? "is-active" : ""}
+              type="button"
+              data-dot={index}
+              role="tab"
+              aria-selected={index === 0 ? "true" : "false"}
+              aria-label={`切换到${slide.title}`}
+            ></button>
+          ))}
+        </div>
+        <button class="arrow" type="button" data-next aria-label="下一张">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const carousels = document.querySelectorAll("[data-hero-carousel]");
+
+  carousels.forEach((carousel) => {
+    const slides = Array.from(carousel.querySelectorAll("[data-slide]"));
+    const dots = Array.from(carousel.querySelectorAll("[data-dot]"));
+    const prev = carousel.querySelector("[data-prev]");
+    const next = carousel.querySelector("[data-next]");
+    const interval = Number(carousel.getAttribute("data-interval")) || 5000;
+    let current = 0;
+    let timer = null;
+
+    carousel.querySelectorAll("img[data-fallback]").forEach((image) => {
+      image.addEventListener("error", () => {
+        const fallback = image.getAttribute("data-fallback");
+        if (fallback && image.getAttribute("src") !== fallback) {
+          image.setAttribute("src", fallback);
+        }
+      }, { once: true });
+    });
+
+    const setActive = (index) => {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        const active = slideIndex === current;
+        slide.classList.toggle("is-active", active);
+        slide.setAttribute("aria-hidden", active ? "false" : "true");
+      });
+      dots.forEach((dot, dotIndex) => {
+        const active = dotIndex === current;
+        dot.classList.toggle("is-active", active);
+        dot.setAttribute("aria-selected", active ? "true" : "false");
+      });
+    };
+
+    const stop = () => {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    const start = () => {
+      stop();
+      if (!document.hidden && slides.length > 1) {
+        timer = window.setInterval(() => setActive(current + 1), interval);
+      }
+    };
+
+    prev?.addEventListener("click", () => {
+      setActive(current - 1);
+      start();
+    });
+
+    next?.addEventListener("click", () => {
+      setActive(current + 1);
+      start();
+    });
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        setActive(Number(dot.getAttribute("data-dot")));
+        start();
+      });
+    });
+
+    carousel.addEventListener("mouseenter", stop);
+    carousel.addEventListener("mouseleave", start);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+    });
+
+    setActive(0);
+    start();
+  });
+</script>
+
+<style>
+  .hero-carousel {
+    border-bottom: 1px solid var(--color-border);
+    background:
+      linear-gradient(120deg, rgba(11, 42, 74, 0.96), rgba(11, 42, 74, 0.86)),
+      var(--color-primary);
+    color: #fff;
+  }
+
+  .carousel-shell {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
+    gap: 34px;
+    align-items: center;
+    min-height: 620px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+
+  .carousel-copy {
+    display: grid;
+    gap: 16px;
+  }
+
+  .eyebrow {
+    color: #FBBF24;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 6vw, 60px);
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
+
+  .hero-summary {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 17px;
+  }
+
+  .carousel-frame {
+    position: relative;
+    min-height: 470px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .slides {
+    position: relative;
+    min-height: 470px;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(330px, 1.1fr);
+    gap: 26px;
+    align-items: stretch;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms ease;
+  }
+
+  .slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  .slide-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .slide-index {
+    margin: 0;
+    color: #FBBF24;
+    font-weight: 900;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .slide-content p:not(.slide-index) {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 17px;
+  }
+
+  .slide-content .button {
+    align-self: flex-start;
+    margin-top: 6px;
+  }
+
+  figure {
+    margin: 0;
+    min-width: 0;
+    background: #0f2339;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1200 / 820;
+    object-fit: cover;
+  }
+
+  .carousel-controls {
+    position: absolute;
+    right: 24px;
+    bottom: 22px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .arrow,
+  .dots button {
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(11, 42, 74, 0.78);
+    color: #fff;
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .arrow:hover,
+  .dots button:hover,
+  .dots button.is-active {
+    border-color: #FBBF24;
+    background: #F59E0B;
+    color: #111827;
+  }
+
+  .dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dots button {
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    border-radius: 999px;
+  }
+
+  @media (max-width: 980px) {
+    .carousel-shell {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .carousel-frame,
+    .slides {
+      min-height: 640px;
+    }
+
+    .slide {
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(220px, 0.9fr) auto;
+    }
+
+    figure {
+      order: -1;
+    }
+
+    .slide-content .button {
+      align-self: flex-start;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .carousel-shell {
+      width: min(100% - 24px, var(--content-width));
+      padding-top: 28px;
+      padding-bottom: 34px;
+    }
+
+    .carousel-frame,
+    .slides {
+      min-height: 690px;
+    }
+
+    .slide {
+      padding: 16px;
+    }
+
+    .carousel-controls {
+      right: 16px;
+      bottom: 16px;
+      left: 16px;
+      justify-content: space-between;
+    }
+  }
+</style>

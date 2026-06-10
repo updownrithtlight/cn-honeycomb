@@ -1,0 +1,26 @@
+---
+const { items = [] } = Astro.props;
+---
+<nav class="breadcrumb" aria-label="面包屑导航">
+  <a href="/">首页</a>
+  {items.map((item) => (
+    <>
+      <span>/</span>
+      {item.href ? <a href={item.href}>{item.label}</a> : <strong>{item.label}</strong>}
+    </>
+  ))}
+</nav>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  strong {
+    color: var(--color-ink);
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import CTASection from "../../components/CTASection.astro";
+import { products } from "../../data/products";
+import { pageSEO } from "../../data/seo";
+---
+<BaseLayout title={pageSEO.products.title} description={pageSEO.products.description} canonical={pageSEO.products.canonical}>
+  <section class="section">
+    <div class="container">
+      <Breadcrumb items={[{ label: "产品中心" }]} />
+      <div class="section-head page-head">
+        <p class="eyebrow">Products</p>
+        <h1 class="section-title">产品中心</h1>
+        <p class="section-lead">恒实蜂窝产品覆盖屏蔽蜂窝通风板、蜂窝通风波导板、金属蜂窝芯、气流整流蜂窝、风洞蜂窝、蜂窝密封件和屏蔽视窗等方向。</p>
+      </div>
+      <div class="grid grid--3">
+        {products.map((product) => (
+          <ProductCard title={product.name} href={`/${product.slug}/`} description={product.description} />
+        ))}
+      </div>
+    </div>
+  </section>
+  <CTASection title="没有找到完全匹配的产品？" lead="可按图纸、样品、材料和应用场景沟通金属蜂窝定制件。" />
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-top: 24px;
+  }
+</style>

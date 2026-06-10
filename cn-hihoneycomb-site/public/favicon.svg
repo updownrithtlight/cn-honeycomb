@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hengshi Honeycomb">
+  <rect width="64" height="64" rx="10" fill="#17202a"/>
+  <path d="M21 17h22l11 15-11 15H21L10 32 21 17Z" fill="none" stroke="#d8b15a" stroke-width="4"/>
+  <path d="M23 24h18M19 32h26M23 40h18" stroke="#f5f7fa" stroke-width="4" stroke-linecap="round"/>
+</svg>

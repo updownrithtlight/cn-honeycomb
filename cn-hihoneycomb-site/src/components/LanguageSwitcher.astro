@@ -1,0 +1,23 @@
+---
+import { siteInfo } from "../data/site";
+---
+<a class="language-switcher" href={siteInfo.englishSite} rel="alternate" hreflang="en">English</a>
+
+<style>
+  .language-switcher {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 13px;
+    border: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .language-switcher:hover {
+    border-color: var(--color-primary);
+  }
+</style>

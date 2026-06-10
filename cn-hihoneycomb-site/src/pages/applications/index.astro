@@ -1,0 +1,117 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import ApplicationCard from "../../components/ApplicationCard.astro";
+import CTASection from "../../components/CTASection.astro";
+import { applications } from "../../data/applications";
+import { pageSEO } from "../../data/seo";
+
+const groups = [
+  {
+    title: "EMI屏蔽",
+    description: "屏蔽室、EMC测试室、屏蔽机柜、MRI屏蔽等通风和视窗位置。",
+    names: ["EMI屏蔽室", "EMC测试室", "屏蔽机柜", "MRI屏蔽"]
+  },
+  {
+    title: "风洞与流场测试",
+    description: "风洞试验、水洞试验、流场测试和航空航天实验相关蜂窝整流结构。",
+    names: ["风洞试验", "水洞试验", "流场测试"]
+  },
+  {
+    title: "风机与通风整流",
+    description: "通风散热、风机出口、管道和测试设备中的气流整理。",
+    names: ["通风散热", "风机整流"]
+  },
+  {
+    title: "汽轮机 / 燃气轮机密封",
+    description: "汽轮机、燃气轮机和压缩机相关蜂窝密封件应用。",
+    names: ["汽轮机密封", "燃气轮机密封", "压缩机密封"]
+  },
+  {
+    title: "屏蔽视窗",
+    description: "需要观察窗口和屏蔽需求并存的工程空间或设备外壳。",
+    names: ["EMI屏蔽室", "屏蔽机柜", "MRI屏蔽"]
+  },
+  {
+    title: "工业降噪",
+    description: "工业设备通风、整流和降噪相关金属蜂窝结构。",
+    names: ["工业降噪", "通风散热"]
+  }
+];
+---
+<BaseLayout title={pageSEO.applications.title} description={pageSEO.applications.description} canonical={pageSEO.applications.canonical}>
+  <section class="section">
+    <div class="container">
+      <Breadcrumb items={[{ label: "应用领域" }]} />
+      <div class="section-head page-head">
+        <p class="eyebrow">Applications</p>
+        <h1 class="section-title">应用领域</h1>
+        <p class="section-lead">围绕 EMI屏蔽、风洞与流场测试、风机与通风整流、汽轮机/燃气轮机密封、屏蔽视窗和工业降噪组织内容。</p>
+      </div>
+      <div class="grid grid--3">
+        {groups.map((group) => (
+          <article class="application-group">
+            <h2>{group.title}</h2>
+            <p>{group.description}</p>
+            <ul>
+              {group.names.map((name) => <li>{name}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Application Data</p>
+        <h2 class="section-title">具体应用场景</h2>
+      </div>
+      <div class="grid grid--3">
+        {applications.map((item) => <ApplicationCard title={item.name} description={item.description} />)}
+      </div>
+    </div>
+  </section>
+  <CTASection title="需要匹配具体应用场景？" lead="请说明设备类型、安装位置、材料要求、尺寸参数和测试条件，便于沟通产品方向。" />
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-top: 24px;
+  }
+
+  .application-group {
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(11, 42, 74, 0.05);
+  }
+
+  .application-group h2 {
+    margin: 0 0 10px;
+    color: var(--color-primary);
+    font-size: 21px;
+  }
+
+  .application-group p {
+    margin: 0 0 16px;
+    color: var(--color-muted);
+  }
+
+  .application-group ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .application-group li {
+    padding: 5px 9px;
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+</style>

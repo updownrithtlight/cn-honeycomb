@@ -1,0 +1,35 @@
+---
+const { items = [] } = Astro.props;
+---
+<div class="faq-list">
+  {items.map((item) => (
+    <details>
+      <summary>{item.question}</summary>
+      <p>{item.answer}</p>
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  details {
+    border: 1px solid var(--color-line);
+    background: #fff;
+  }
+
+  summary {
+    cursor: pointer;
+    padding: 16px 18px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    padding: 0 18px 18px;
+    color: var(--color-muted);
+  }
+</style>

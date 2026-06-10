@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" role="img" aria-labelledby="title desc">
+  <title id="title">Metal honeycomb product placeholder</title>
+  <desc id="desc">A local placeholder graphic for Hengshi Honeycomb metal honeycomb products.</desc>
+  <rect width="900" height="680" fill="#0B2A4A"/>
+  <g fill="none" stroke="#F59E0B" stroke-width="8" opacity="0.9">
+    <path d="M150 110h110l55 95-55 95H150L95 205l55-95Z"/>
+    <path d="M315 110h110l55 95-55 95H315l-55-95 55-95Z"/>
+    <path d="M480 110h110l55 95-55 95H480l-55-95 55-95Z"/>
+    <path d="M645 110h110l55 95-55 95H645l-55-95 55-95Z"/>
+    <path d="M232 252h110l55 95-55 95H232l-55-95 55-95Z"/>
+    <path d="M397 252h110l55 95-55 95H397l-55-95 55-95Z"/>
+    <path d="M562 252h110l55 95-55 95H562l-55-95 55-95Z"/>
+    <path d="M150 394h110l55 95-55 95H150l-55-95 55-95Z"/>
+    <path d="M315 394h110l55 95-55 95H315l-55-95 55-95Z"/>
+    <path d="M480 394h110l55 95-55 95H480l-55-95 55-95Z"/>
+    <path d="M645 394h110l55 95-55 95H645l-55-95 55-95Z"/>
+  </g>
+  <path d="M0 560h900v120H0z" fill="#123E68"/>
+  <text x="56" y="620" fill="#F5F7FA" font-family="Arial, sans-serif" font-size="34" font-weight="700">Hengshi Honeycomb</text>
+</svg>

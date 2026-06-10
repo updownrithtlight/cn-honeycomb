@@ -1,0 +1,138 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import ContactBlock from "../../components/ContactBlock.astro";
+import CTASection from "../../components/CTASection.astro";
+import { siteInfo, inquiryFields } from "../../data/site";
+import { pageSEO } from "../../data/seo";
+
+const mailSubject = encodeURIComponent("金属蜂窝定制询价");
+const mailBody = encodeURIComponent(`您好，我想咨询金属蜂窝定制。\n\n联系人：\n电话：\n用途：\n材质：\n孔径 / Cell Size：\n箔厚 / Foil Thickness：\n蜂窝厚度 / Depth：\n外形尺寸：\n边框结构：\n表面处理：\n数量：\n交付地：\n测试要求：\n`);
+const mailto = `mailto:${siteInfo.email}?subject=${mailSubject}&body=${mailBody}`;
+---
+<BaseLayout title={pageSEO.contact.title} description={pageSEO.contact.description} canonical={pageSEO.contact.canonical}>
+  <section class="section">
+    <div class="container">
+      <Breadcrumb items={[{ label: "联系我们" }]} />
+      <div class="section-head page-head">
+        <p class="eyebrow">Contact</p>
+        <h1 class="section-title">联系我们</h1>
+        <p class="section-lead">请提供产品用途、材料、孔径、箔厚、蜂窝厚度、尺寸、边框结构、图纸或草图等信息，便于沟通金属蜂窝定制方案。</p>
+      </div>
+
+      <div class="contact-grid">
+        <section class="contact-card">
+          <h2>联系方式</h2>
+          <dl>
+            <dt>业务热线</dt>
+            <dd><a href={`tel:${siteInfo.phone}`}>{siteInfo.phone}</a></dd>
+            <dt>邮箱</dt>
+            <dd><a href={`mailto:${siteInfo.email}`}>{siteInfo.email}</a></dd>
+            <dt>备用邮箱</dt>
+            <dd><a href={`mailto:${siteInfo.fallbackEmail}`}>{siteInfo.fallbackEmail}</a></dd>
+            <dt>地址</dt>
+            <dd>{siteInfo.address}</dd>
+            <dt>英文官网</dt>
+            <dd><a href={siteInfo.englishSite}>{siteInfo.englishSite}</a></dd>
+          </dl>
+          <div class="button-row">
+            <a class="button" href={mailto}>通过邮箱发送询价</a>
+          </div>
+        </section>
+
+        <section class="contact-card">
+          <h2>询价时建议提供</h2>
+          <ul>
+            {inquiryFields.map((field) => <li>{field}</li>)}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted">
+    <div class="container form-note">
+      <ContactBlock />
+      <p>当前为静态站，无后端表单接口，因此不提供假提交表单。请使用邮箱链接发送询价，或在后续接入真实表单服务后再启用在线表单。</p>
+    </div>
+  </section>
+
+  <CTASection title="提交图纸或参数后沟通更高效" lead="建议一次性提供用途、材料、尺寸、孔径、厚度、数量和测试要求。" />
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-top: 24px;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 28px;
+  }
+
+  .contact-card {
+    padding: 26px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .contact-card h2 {
+    margin: 0 0 16px;
+    color: var(--color-primary);
+    font-size: 23px;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px 16px;
+    margin: 0;
+  }
+
+  dt {
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-muted);
+    word-break: break-word;
+  }
+
+  .contact-card ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contact-card li {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .form-note {
+    display: grid;
+    gap: 16px;
+    max-width: 900px;
+  }
+
+  .form-note > p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 900px) {
+    .contact-grid,
+    .contact-card ul,
+    dl {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

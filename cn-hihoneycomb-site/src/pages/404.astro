@@ -1,0 +1,31 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CTASection from "../components/CTASection.astro";
+import { siteInfo } from "../data/site";
+
+const title = "页面不存在 | 恒实蜂窝";
+const description = "当前页面不存在。你可以返回恒实蜂窝首页、查看产品中心或联系我们提交金属蜂窝定制需求。";
+---
+<BaseLayout title={title} description={description} canonical={`${siteInfo.domain}404/`}>
+  <section class="section error-page">
+    <div class="container">
+      <p class="eyebrow">404</p>
+      <h1 class="section-title">页面不存在</h1>
+      <p class="section-lead">你访问的页面可能已移动或暂未创建。可以返回首页、查看产品中心，或联系我们沟通金属蜂窝定制需求。</p>
+      <div class="button-row">
+        <a class="button" href="/">返回首页</a>
+        <a class="button button--ghost" href="/products/">查看产品中心</a>
+        <a class="button button--ghost" href="/contact/">联系我们</a>
+      </div>
+    </div>
+  </section>
+  <CTASection title="需要帮助查找产品？" lead="请说明应用场景、材料、尺寸和图纸参数，我们可以协助沟通产品方向。" />
+</BaseLayout>
+
+<style>
+  .error-page {
+    min-height: 58vh;
+    display: grid;
+    align-items: center;
+  }
+</style>
