@@ -6,7 +6,7 @@ const { rows = [] } = Astro.props;
     <tbody>
       {rows.map((row) => (
         <tr>
-          <th>{row.label}</th>
+          <th scope="row">{row.label}</th>
           <td>{row.value}</td>
         </tr>
       ))}
@@ -48,5 +48,40 @@ const { rows = [] } = Astro.props;
 
   td {
     color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 640px) {
+    .table-wrap {
+      overflow: visible;
+      border: 0;
+      background: transparent;
+    }
+
+    .parameter-table,
+    .parameter-table tbody,
+    .parameter-table tr,
+    .parameter-table th,
+    .parameter-table td {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .parameter-table tr {
+      margin-bottom: 12px;
+      border: 1px solid var(--color-border);
+      background: #fff;
+    }
+
+    .parameter-table th,
+    .parameter-table td {
+      padding: 12px 14px;
+      border-bottom: 0;
+    }
+
+    .parameter-table th {
+      border-bottom: 1px solid var(--color-border);
+    }
   }
 </style>

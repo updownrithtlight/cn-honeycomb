@@ -5,6 +5,7 @@ import NewsCard from "../../components/NewsCard.astro";
 import CTASection from "../../components/CTASection.astro";
 import { newsItems } from "../../data/news";
 import { pageSEO } from "../../data/seo";
+const sortedNews = [...newsItems].sort((a, b) => b.date.localeCompare(a.date));
 ---
 <BaseLayout title={pageSEO.news.title} description={pageSEO.news.description} canonical={pageSEO.news.canonical}>
   <section class="section">
@@ -16,12 +17,14 @@ import { pageSEO } from "../../data/seo";
         <p class="section-lead">发布恒实蜂窝参展、制造能力和企业发展相关动态。内容以可核实资料为基础，不虚构客户案例、认证或测试数据。</p>
       </div>
       <div class="news-list">
-        {newsItems.map((item) => (
+        {sortedNews.map((item) => (
           <NewsCard
             title={item.title}
             date={item.date}
             excerpt={item.excerpt}
             href={`/news/${item.slug}/`}
+            image={item.images[0]?.src}
+            imageAlt={item.images[0]?.alt}
           />
         ))}
       </div>
@@ -38,6 +41,6 @@ import { pageSEO } from "../../data/seo";
   .news-list {
     display: grid;
     gap: 18px;
-    max-width: 900px;
+    max-width: 980px;
   }
 </style>

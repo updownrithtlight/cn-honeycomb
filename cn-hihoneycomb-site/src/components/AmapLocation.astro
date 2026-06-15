@@ -1,0 +1,178 @@
+---
+import { siteInfo } from "../data/site";
+
+const amapKey = import.meta.env.PUBLIC_AMAP_JS_KEY || "";
+const securityJsCode = import.meta.env.PUBLIC_AMAP_SECURITY_JS_CODE || "";
+const [longitude, latitude] = siteInfo.amapPosition;
+const searchUrl = `https://uri.amap.com/marker?position=${longitude},${latitude}&name=${encodeURIComponent(siteInfo.companyName)}&src=${encodeURIComponent("cn.hihoneycomb.com")}&coordinate=gaode&callnative=0`;
+---
+<section
+  class="map-panel"
+  data-amap-location
+  data-amap-key={amapKey}
+  data-amap-security-code={securityJsCode}
+  data-address={siteInfo.address}
+  data-company={siteInfo.companyName}
+  data-longitude={longitude}
+  data-latitude={latitude}
+>
+  <div class="map-copy">
+    <p class="eyebrow">Location</p>
+    <h2>公司位置</h2>
+    <p>{siteInfo.address}</p>
+    <div class="map-actions">
+      {amapKey && securityJsCode && <button class="button" type="button" data-load-map>加载高德地图</button>}
+      <a class:list={["button", { "button--ghost": amapKey && securityJsCode }]} href={searchUrl} target="_blank" rel="noopener noreferrer">在高德地图中搜索</a>
+    </div>
+    {(!amapKey || !securityJsCode) && <p class="map-note">站内地图等待配置高德 Web 端 Key，外部搜索入口可正常使用。</p>}
+  </div>
+  <div class="map-shell">
+    <div class="map-placeholder" data-map-placeholder>
+      <span aria-hidden="true">⌖</span>
+      <strong>{siteInfo.companyName}</strong>
+      <small>{siteInfo.address}</small>
+    </div>
+    <div class="map-container" data-map-container aria-label={`${siteInfo.companyName}高德地图位置`}></div>
+    <p class="map-status" data-map-status role="status" aria-live="polite"></p>
+    <div class="map-calibration" data-map-calibration hidden>
+      <strong>手动标注模式</strong>
+      <span>拖动红色标记到厂区准确位置</span>
+      <code data-map-coordinate></code>
+      <button type="button" data-copy-coordinate>复制坐标</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const panels = document.querySelectorAll("[data-amap-location]");
+
+  const loadScript = (src) =>
+    new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        if (window.AMapLoader) resolve();
+        else existing.addEventListener("load", resolve, { once: true });
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+
+  panels.forEach((panel) => {
+    const button = panel.querySelector("[data-load-map]");
+    const container = panel.querySelector("[data-map-container]");
+    const placeholder = panel.querySelector("[data-map-placeholder]");
+    const status = panel.querySelector("[data-map-status]");
+    const calibration = panel.querySelector("[data-map-calibration]");
+    const coordinateOutput = panel.querySelector("[data-map-coordinate]");
+    const copyCoordinateButton = panel.querySelector("[data-copy-coordinate]");
+    const key = panel.getAttribute("data-amap-key") || "";
+    const securityJsCode = panel.getAttribute("data-amap-security-code") || "";
+    const address = panel.getAttribute("data-address") || "";
+    const company = panel.getAttribute("data-company") || "";
+    const longitude = Number(panel.getAttribute("data-longitude"));
+    const latitude = Number(panel.getAttribute("data-latitude"));
+    const editMode = new URLSearchParams(window.location.search).get("map-edit") === "1";
+
+    const showCoordinate = (lng, lat) => {
+      const value = `${Number(lng).toFixed(6)}, ${Number(lat).toFixed(6)}`;
+      if (coordinateOutput) coordinateOutput.textContent = value;
+      return value;
+    };
+
+    if (editMode) {
+      calibration?.removeAttribute("hidden");
+      showCoordinate(longitude, latitude);
+    }
+
+    copyCoordinateButton?.addEventListener("click", async () => {
+      const value = coordinateOutput?.textContent || "";
+      if (!value) return;
+      await navigator.clipboard.writeText(value);
+      if (copyCoordinateButton instanceof HTMLButtonElement) {
+        copyCoordinateButton.textContent = "已复制";
+      }
+    });
+
+    button?.addEventListener("click", async () => {
+      if (!(button instanceof HTMLButtonElement) || !(container instanceof HTMLElement)) return;
+      button.disabled = true;
+      if (status) status.textContent = "正在加载地图…";
+
+      try {
+        window._AMapSecurityConfig = { securityJsCode };
+        await loadScript("https://webapi.amap.com/loader.js");
+        const AMap = await window.AMapLoader.load({
+          key,
+          version: "2.0",
+          plugins: ["AMap.Scale"]
+        });
+        const position = [longitude, latitude];
+        const map = new AMap.Map(container, { center: position, zoom: 17, viewMode: "2D" });
+        const markerContent = document.createElement("div");
+        markerContent.className = "company-marker";
+        markerContent.innerHTML = `<span></span><strong>${company}</strong>`;
+        const marker = new AMap.Marker({
+          position,
+          title: company,
+          anchor: "bottom-center",
+          content: markerContent,
+          draggable: editMode,
+          cursor: editMode ? "move" : "pointer"
+        });
+        map.add(marker);
+        if (editMode) {
+          marker.on("dragend", (event) => {
+            const movedPosition = event.lnglat;
+            showCoordinate(movedPosition.getLng(), movedPosition.getLat());
+            if (copyCoordinateButton instanceof HTMLButtonElement) {
+              copyCoordinateButton.textContent = "复制坐标";
+            }
+          });
+        }
+        map.addControl(new AMap.Scale());
+        placeholder?.setAttribute("hidden", "");
+        container.dataset.visible = "true";
+        button.hidden = true;
+        if (status) {
+          status.textContent = editMode
+            ? "请拖动红色标记到厂区准确位置，然后复制坐标发给我。"
+            : `${company}：${address}`;
+        }
+      } catch {
+        if (status) status.textContent = "地图加载失败，请使用高德地图搜索入口。";
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .map-panel { display: grid; grid-template-columns: minmax(300px, .72fr) minmax(0, 1.28fr); min-height: 440px; border: 1px solid var(--color-border); background: #fff; box-shadow: var(--shadow-soft); }
+  .map-copy { display: flex; flex-direction: column; justify-content: center; padding: clamp(28px, 5vw, 54px); }
+  h2 { margin: 6px 0 14px; color: var(--color-primary); font-size: clamp(28px, 4vw, 40px); }
+  .map-copy > p:not(.eyebrow) { margin: 0; color: var(--color-muted); }
+  .map-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .map-note { margin-top: 14px !important; font-size: 13px; }
+  .map-shell { position: relative; min-height: 440px; overflow: hidden; background: linear-gradient(rgba(11,42,74,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,42,74,.05) 1px, transparent 1px), #f3f6f8; background-size: 32px 32px; }
+  .map-placeholder { position: absolute; inset: 0; z-index: 1; display: grid; place-content: center; gap: 8px; padding: 30px; text-align: center; color: var(--color-primary); }
+  .map-placeholder[hidden] { display: none; }
+  .map-placeholder span { color: var(--color-accent); font-size: 54px; line-height: 1; }
+  .map-placeholder small { max-width: 440px; color: var(--color-muted); font-size: 14px; }
+  .map-container { position: absolute; inset: 0; opacity: 0; }
+  .map-container[data-visible="true"] { opacity: 1; }
+  .map-status { position: absolute; right: 14px; bottom: 12px; z-index: 2; max-width: calc(100% - 28px); margin: 0; padding: 7px 10px; background: rgba(255,255,255,.9); color: var(--color-muted); font-size: 12px; }
+  .map-status:empty { display: none; }
+  .map-calibration { position: absolute; left: 14px; top: 14px; z-index: 3; display: grid; gap: 6px; max-width: calc(100% - 28px); padding: 12px 14px; border: 1px solid rgba(229,72,63,.35); background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); color: var(--color-primary); font-size: 13px; }
+  .map-calibration[hidden] { display: none; }
+  .map-calibration span { color: var(--color-muted); }
+  .map-calibration code { padding: 6px 8px; background: #f3f6f8; color: #b42318; font-size: 14px; }
+  .map-calibration button { justify-self: start; padding: 7px 12px; border: 0; background: var(--color-accent); color: #111; font: inherit; font-weight: 700; cursor: pointer; }
+  :global(.company-marker) { display: grid; justify-items: center; min-width: 220px; transform: translateY(4px); }
+  :global(.company-marker span) { width: 24px; height: 24px; border: 7px solid #fff; border-radius: 50% 50% 50% 0; background: #e5483f; box-shadow: 0 3px 10px rgba(0,0,0,.28); transform: rotate(-45deg); }
+  :global(.company-marker strong) { margin-top: 8px; padding: 6px 10px; border-radius: 3px; background: rgba(11,42,74,.92); color: #fff; font-size: 13px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  @media (max-width: 820px) { .map-panel { grid-template-columns: 1fr; } .map-shell { min-height: 360px; } }
+</style>

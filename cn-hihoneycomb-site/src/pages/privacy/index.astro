@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import { siteInfo } from "../../data/site";
+
+const canonical = `${siteInfo.domain}privacy/`;
+---
+<BaseLayout title="隐私政策 | 恒实蜂窝" description="恒实蜂窝中文网站的询盘信息、附件、访问统计和数据处理说明。" canonical={canonical}>
+  <section class="section">
+    <div class="container legal-page">
+      <Breadcrumb items={[{ label: "隐私政策" }]} />
+      <h1>隐私政策</h1>
+      <p>更新日期：2026 年 6 月 11 日</p>
+      <h2>我们收集的信息</h2>
+      <p>当您提交询盘时，我们会收集您主动填写的姓名、公司、电话、邮箱、项目参数、留言和附件，用于评估需求、联系回复和项目跟进。</p>
+      <h2>信息使用和保存</h2>
+      <p>询盘信息仅用于业务沟通、报价、样品和订单相关处理。请勿在附件中提交与项目无关的敏感个人信息。保存期限根据项目跟进、合同和法定义务确定。</p>
+      <h2>访问统计</h2>
+      <p>网站仅在您同意后加载配置的第三方访问统计服务。统计事件不包含表单正文、附件内容、电话或邮箱。您可以通过浏览器清除本地存储重新选择。</p>
+      <h2>第三方处理</h2>
+      <p>为完成询盘邮件发送，信息可能由网站配置的邮件服务商代为传输。我们不会出售您的个人信息。</p>
+      <p>联系页面的高德地图仅在您主动点击加载后连接高德服务。高德可能接收您的 IP 地址、浏览器信息及地图交互数据；您也可以仅使用文字地址或外部地图搜索入口。</p>
+      <h2>您的权利</h2>
+      <p>如需查询、更正或删除您提交的信息，请通过 <a href={`mailto:${siteInfo.email}`}>{siteInfo.email}</a> 联系我们。法律法规要求保留的内容除外。</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-page { max-width: 860px; }
+  h1 { margin: 28px 0 18px; color: var(--color-primary); font-size: clamp(34px, 5vw, 52px); }
+  h2 { margin: 32px 0 10px; color: var(--color-primary); font-size: 22px; }
+  p { color: var(--color-muted); }
+  a { color: var(--color-primary-light); text-decoration: underline; }
+</style>

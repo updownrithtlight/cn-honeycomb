@@ -1,0 +1,347 @@
+---
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+---
+<section class="inquiry-form-panel" aria-labelledby="inquiry-form-title">
+  <div class="form-heading">
+    <p class="eyebrow">在线询价</p>
+    <h2 id="inquiry-form-title">提交产品参数和图纸</h2>
+    <p>带星号的项目为必填。附件最多 3 个，单个不超过 5MB，总计不超过 8MB。</p>
+  </div>
+
+  <form class="inquiry-form" data-inquiry-form novalidate>
+    <div class="form-grid">
+      <label>
+        <span>联系人 *</span>
+        <input name="contactName" autocomplete="name" maxlength="80" required />
+      </label>
+      <label>
+        <span>公司名称</span>
+        <input name="company" autocomplete="organization" maxlength="120" />
+      </label>
+      <label>
+        <span>联系电话</span>
+        <input name="phone" autocomplete="tel" inputmode="tel" maxlength="40" />
+      </label>
+      <label>
+        <span>电子邮箱</span>
+        <input name="email" type="email" autocomplete="email" maxlength="160" />
+      </label>
+      <label class="form-span">
+        <span>产品用途 *</span>
+        <input name="purpose" maxlength="200" placeholder="例如：风洞整流、屏蔽机柜通风、燃气轮机蜂窝密封" required />
+      </label>
+      <label>
+        <span>关键参数</span>
+        <input name="parameters" maxlength="500" placeholder="材料、孔径、箔厚、厚度、尺寸等" />
+      </label>
+      <label>
+        <span>预计数量</span>
+        <input name="quantity" maxlength="80" />
+      </label>
+      <label class="form-span">
+        <span>需求说明 *</span>
+        <textarea name="message" rows="6" maxlength="3000" required></textarea>
+      </label>
+      <label class="form-span file-field">
+        <span>图纸或参考附件</span>
+        <input
+          name="attachments"
+          type="file"
+          multiple
+          accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.webp,.zip,application/pdf,image/jpeg,image/png,image/webp,application/zip"
+        />
+        <small>支持 PDF、DWG、DXF、JPG、PNG、WebP、ZIP。请勿上传包含无关个人信息或机密资料的文件。</small>
+      </label>
+    </div>
+
+    <label class="honeypot" aria-hidden="true">
+      <span>网站</span>
+      <input name="website" tabindex="-1" autocomplete="off" />
+    </label>
+
+    {turnstileSiteKey && (
+      <div class="turnstile-wrap">
+        <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-language="zh-CN"></div>
+      </div>
+    )}
+
+    <label class="consent">
+      <input name="privacyConsent" type="checkbox" required />
+      <span>我已阅读并同意<a href="/privacy/">隐私政策</a>，同意网站为处理询价而使用上述信息。*</span>
+    </label>
+
+    <div class="form-actions">
+      <button class="button" type="submit">提交询价</button>
+      <p class="form-status" data-form-status role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</section>
+
+{turnstileSiteKey && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
+<script>
+  const form = document.querySelector("[data-inquiry-form]");
+  const status = form?.querySelector("[data-form-status]");
+  const submitButton = form?.querySelector('button[type="submit"]');
+  const fileInput = form?.querySelector('input[type="file"]');
+
+  const allowedExtensions = new Set(["pdf", "dwg", "dxf", "jpg", "jpeg", "png", "webp", "zip"]);
+  const maxFileSize = 5 * 1024 * 1024;
+  const maxTotalSize = 8 * 1024 * 1024;
+  const maxFileCount = 3;
+
+  const setStatus = (message, type = "") => {
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.type = type;
+  };
+
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const validateFiles = (files) => {
+    if (files.length > maxFileCount) return `附件最多上传 ${maxFileCount} 个。`;
+    let total = 0;
+    for (const file of files) {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "";
+      if (!allowedExtensions.has(extension)) return `不支持附件格式：${file.name}`;
+      if (file.size > maxFileSize) return `附件超过 5MB：${file.name}`;
+      total += file.size;
+    }
+    if (total > maxTotalSize) return "附件总大小不能超过 8MB。";
+    return "";
+  };
+
+  fileInput?.addEventListener("change", () => {
+    const error = validateFiles(Array.from(fileInput.files || []));
+    setStatus(error, error ? "error" : "");
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement) || !(submitButton instanceof HTMLButtonElement)) return;
+
+    if (!form.reportValidity()) {
+      setStatus("请检查必填信息，并至少填写电话或邮箱。", "error");
+      return;
+    }
+
+    const data = new FormData(form);
+    const phone = String(data.get("phone") || "").trim();
+    const email = String(data.get("email") || "").trim();
+    if (!phone && !email) {
+      setStatus("联系电话和电子邮箱至少填写一项。", "error");
+      form.querySelector('input[name="phone"]')?.focus();
+      return;
+    }
+
+    const files = Array.from(fileInput?.files || []);
+    const fileError = validateFiles(files);
+    if (fileError) {
+      setStatus(fileError, "error");
+      fileInput?.focus();
+      return;
+    }
+
+    submitButton.disabled = true;
+    setStatus("正在提交，请稍候…");
+
+    try {
+      const attachments = await Promise.all(
+        files.map(async (file) => ({
+          filename: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+          content: await toBase64(file)
+        }))
+      );
+
+      const payload = {
+        contactName: String(data.get("contactName") || ""),
+        company: String(data.get("company") || ""),
+        phone,
+        email,
+        purpose: String(data.get("purpose") || ""),
+        parameters: String(data.get("parameters") || ""),
+        quantity: String(data.get("quantity") || ""),
+        message: String(data.get("message") || ""),
+        website: String(data.get("website") || ""),
+        privacyConsent: data.get("privacyConsent") === "on",
+        turnstileToken: String(data.get("cf-turnstile-response") || ""),
+        attachments
+      };
+
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) throw new Error(result.message || "提交失败，请稍后重试。");
+
+      setStatus(`提交成功，询盘编号：${result.inquiryId}`, "success");
+      form.reset();
+      document.dispatchEvent(new CustomEvent("site:conversion"));
+      if (window.turnstile) window.turnstile.reset();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "提交失败，请稍后重试。", "error");
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .inquiry-form-panel {
+    padding: 30px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .form-heading {
+    max-width: 760px;
+    margin-bottom: 24px;
+  }
+
+  .form-heading h2 {
+    margin: 6px 0 8px;
+    color: var(--color-primary);
+    font-size: 28px;
+  }
+
+  .form-heading p:last-child {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  label {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 0;
+    background: #fff;
+    color: var(--color-text);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  input:focus,
+  textarea:focus {
+    border-color: #2563eb;
+  }
+
+  .form-span {
+    grid-column: 1 / -1;
+  }
+
+  .file-field small {
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .turnstile-wrap {
+    margin-top: 20px;
+  }
+
+  .consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .consent input {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    flex: 0 0 auto;
+  }
+
+  .consent a {
+    margin: 0 4px;
+    color: var(--color-primary-light);
+    font-weight: 800;
+    text-decoration: underline;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 22px;
+  }
+
+  .form-actions button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+
+  .form-status {
+    margin: 0;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .form-status[data-type="error"] {
+    color: #b42318;
+  }
+
+  .form-status[data-type="success"] {
+    color: #067647;
+    font-weight: 800;
+  }
+
+  @media (max-width: 700px) {
+    .inquiry-form-panel {
+      padding: 22px 16px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-span {
+      grid-column: auto;
+    }
+
+    .form-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  }
+</style>

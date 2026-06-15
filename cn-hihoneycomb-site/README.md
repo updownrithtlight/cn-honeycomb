@@ -4,9 +4,11 @@
 
 ## 技术栈
 
-- Astro 静态站
-- 每个页面输出独立 HTML
-- Nginx 托管静态文件
+- Astro 静态页面生成
+- Node.js 静态服务与询盘 API
+- Resend 邮件投递（运行时配置）
+- Cloudflare Turnstile 防机器人验证（运行时配置）
+- Nginx 可作为 HTTPS 反向代理
 
 ## 本地开发
 
@@ -15,129 +17,76 @@ npm install
 npm run dev
 ```
 
-默认访问：
+默认访问 `http://localhost:4321/`。
 
-```txt
-http://localhost:4321/
-```
-
-## 构建
+## 构建与检查
 
 ```bash
 npm run build
+npm run qa
+npm audit
 ```
 
-构建产物输出到：
+构建产物在 `dist/`。`npm run qa` 检查标题与描述唯一性、单一 H1、canonical、图片 alt、内部链接、sitemap 和禁止出现的占位文本。
 
-```txt
-dist/
-```
-
-## 本地预览
+## 生产运行
 
 ```bash
-npm run preview
+npm run build
+npm start
 ```
 
-## Docker 部署
+`npm start` 提供静态页面、正确的 404 状态、`/api/health` 和 `/api/inquiries`。
 
-构建并启动：
+## 环境变量
+
+复制 `.env.example` 为本地 `.env`，由部署环境注入必要值：
+
+- `RESEND_API_KEY`
+- `INQUIRY_FROM_EMAIL`
+- `INQUIRY_TO_EMAIL`
+- `PUBLIC_TURNSTILE_SITE_KEY`（构建时）
+- `TURNSTILE_SECRET_KEY`（运行时）
+
+未配置邮件或生产环境未配置人机验证时，询盘接口会明确返回不可用，不会伪造提交成功。
+
+可选统计配置：
+
+- `PUBLIC_ANALYTICS_PROVIDER=ga4` 或 `baidu`
+- `PUBLIC_ANALYTICS_ID`
+
+统计脚本只有访客同意后才加载，事件不包含表单正文、联系方式或附件。
+
+## Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-服务名：
+服务映射到 `http://服务器IP:8088/`。容器直接运行 Node 服务；外部 Nginx 可参考 `nginx.conf` 反向代理到 `127.0.0.1:4321`。
 
-```txt
-cn-hihoneycomb-site
-```
+## DNS 与 HTTPS
 
-本地端口示例：
-
-```txt
-http://服务器IP:8088/
-```
-
-停止服务：
-
-```bash
-docker compose down
-```
-
-## Nginx 部署
-
-如果不使用 Docker，可在服务器上执行：
-
-```bash
-npm ci
-npm run build
-```
-
-然后将 `dist/` 目录内容同步到 Nginx 站点目录，例如：
-
-```txt
-/var/www/cn-hihoneycomb-site/
-```
-
-Nginx 可参考项目根目录的 `nginx.conf`。该配置包含：
-
-- `server_name cn.hihoneycomb.com;`
-- 静态文件托管
-- gzip
-- HTML 不长期强缓存
-- CSS / JS / images 长缓存
-- `/404.html` 作为 404 页面
-- 不把所有页面重写到 `index.html`
-
-非 Docker 部署时，把 `root` 改为：
-
-```nginx
-root /var/www/cn-hihoneycomb-site;
-```
-
-## DNS 解析
-
-需要将：
-
-```txt
-cn.hihoneycomb.com
-```
-
-解析到服务器 IP。
-
-如果使用 Cloudflare Pages、Vercel、Netlify 等静态托管平台，则在对应平台绑定 `cn.hihoneycomb.com`，并按平台要求添加 CNAME 或 A 记录。
-
-## HTTPS 证书
-
-服务器部署建议使用 Nginx + Certbot：
+将 `cn.hihoneycomb.com` 解析到服务器 IP，并由 Nginx、云平台或 CDN 配置 HTTPS。Nginx + Certbot 示例：
 
 ```bash
 certbot --nginx -d cn.hihoneycomb.com
 ```
 
-静态托管平台通常自动提供 HTTPS。也可以使用 Cloudflare 代理提供 HTTPS 和缓存能力。
-
 ## 上线后 SEO 提交
 
-上线后检查：
+检查：
 
 - https://cn.hihoneycomb.com/robots.txt
 - https://cn.hihoneycomb.com/sitemap.xml
-- 每个页面 canonical 是否指向当前中文 URL
-- hreflang 是否包含 `zh-CN`、`en`、`x-default`
+- 每页 canonical 是否指向当前中文 URL
+- 首页 hreflang 是否包含真实对应的 `zh-CN`、`en`、`x-default`
 
-然后将 sitemap 提交到可用的搜索引擎站长平台。
+然后向可用的搜索引擎站长平台提交 sitemap。
 
-## 需要人工替换内容
+## 上线前人工事项
 
-- 当前占位图只用于版式搭建，后续需要替换为真实产品、工艺、车间或应用图片。
-- 不要抓取英文官网或中文参考站图片。
-- 联系方式、备案号、证书、检测资料、客户案例等必须以真实资料为准；没有资料时不要编造。
-
-## 设计系统
-
-- 主色：工业蓝 `#0B2A4A`
-- 强调色：琥珀色 `#F59E0B`
-- 背景：白色与浅灰 `#F5F7FA`
-- 风格：工业制造、金属质感、技术可信、适合 B2B 采购和工程师阅读
+- 补齐真实产品、工艺、车间和应用图片；当前结构示意图不能代替实物证据。
+- 不抓取英文官网或中文参考站图片。
+- 证书、检测资料、客户案例必须完成证据核验，见 `docs/CLAIMS_VERIFICATION.md`。
+- 完成域名 DNS、HTTPS、Turnstile、Resend 发信域名和真实收件测试。

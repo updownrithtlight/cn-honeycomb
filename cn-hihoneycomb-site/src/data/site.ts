@@ -4,10 +4,11 @@ export const siteInfo = {
   brandEnglish: "Hengshi Honeycomb",
   domain: "https://cn.hihoneycomb.com/",
   englishSite: "https://www.hihoneycomb.com/",
-  phone: "18932617015",
-  email: "88548056@qq.com",
-  fallbackEmail: "info@hengshi-emi.com",
+  phone: "17778159135",
+  email: "996085078@qq.com",
+  fallbackEmail: "sales@hihoneycomb.com",
   address: "河北省廊坊市固安县高新区通达道2号",
+  amapPosition: [116.340853, 39.406046] as const,
   description:
     "恒实蜂窝是集研发、制造、销售于一体的金属蜂窝技术企业，面向 EMI/RFI 屏蔽、风洞试验、气流整流、航空航天发动机及燃气轮机蜂窝密封等应用提供定制产品。"
 };
@@ -22,9 +23,7 @@ export const inquiryFields = [
   "边框结构",
   "表面处理",
   "图纸或草图",
-  "数量",
-  "交付地",
-  "测试要求"
+  "数量"
 ];
 
 export const performanceNotice =

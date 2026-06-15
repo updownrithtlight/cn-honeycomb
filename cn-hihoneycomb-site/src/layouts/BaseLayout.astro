@@ -3,6 +3,7 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import SEOHead from "../components/SEOHead.astro";
+import Analytics from "../components/Analytics.astro";
 import { defaultSEO } from "../data/seo";
 import { siteInfo } from "../data/site";
 
@@ -10,8 +11,11 @@ const {
   title = defaultSEO.title,
   description = defaultSEO.description,
   canonical = defaultSEO.canonical,
+  image = `${siteInfo.domain}images/brand/hengshi-logo.jpg`,
+  ogType = "website",
   jsonLd = [],
-  alternateEn = siteInfo.englishSite
+  includeDefaultBreadcrumb = true,
+  alternateEn = canonical === siteInfo.domain ? siteInfo.englishSite : null
 } = Astro.props;
 
 const pageName = title.split("|")[0].split("｜")[0].trim();
@@ -55,12 +59,16 @@ const breadcrumbJsonLd = {
   itemListElement: breadcrumbItems
 };
 
-const structuredData = [organizationJsonLd, breadcrumbJsonLd, ...jsonLd];
+const structuredData = [
+  organizationJsonLd,
+  ...(includeDefaultBreadcrumb ? [breadcrumbJsonLd] : []),
+  ...jsonLd
+];
 ---
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <SEOHead title={title} description={description} canonical={canonical} structuredData={structuredData} alternateEn={alternateEn} />
+    <SEOHead title={title} description={description} canonical={canonical} image={image} ogType={ogType} structuredData={structuredData} alternateEn={alternateEn} />
   </head>
   <body>
     <Header />
@@ -68,5 +76,6 @@ const structuredData = [organizationJsonLd, breadcrumbJsonLd, ...jsonLd];
       <slot />
     </main>
     <Footer />
+    <Analytics />
   </body>
 </html>

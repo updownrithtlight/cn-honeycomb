@@ -5,6 +5,7 @@ export const mainNavigation = [
   { href: "/products/", label: "产品中心" },
   { href: "/applications/", label: "应用领域" },
   { href: "/custom-metal-honeycomb/", label: "定制能力" },
+  { href: "/technical/", label: "技术文章" },
   { href: "/news/", label: "企业新闻" },
   { href: "/about/", label: "关于我们" },
   { href: "/contact/", label: "联系我们" }
@@ -23,5 +24,6 @@ export const reservedRoutes = [
   "/news/",
   "/about/",
   "/contact/",
-  "/articles/"
+  "/articles/",
+  "/technical/"
 ];

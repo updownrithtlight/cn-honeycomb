@@ -2,12 +2,14 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../components/Breadcrumb.astro";
 import ContactBlock from "../../components/ContactBlock.astro";
+import InquiryForm from "../../components/InquiryForm.astro";
 import CTASection from "../../components/CTASection.astro";
+import AmapLocation from "../../components/AmapLocation.astro";
 import { siteInfo, inquiryFields } from "../../data/site";
 import { pageSEO } from "../../data/seo";
 
 const mailSubject = encodeURIComponent("金属蜂窝定制询价");
-const mailBody = encodeURIComponent(`您好，我想咨询金属蜂窝定制。\n\n联系人：\n电话：\n用途：\n材质：\n孔径 / Cell Size：\n箔厚 / Foil Thickness：\n蜂窝厚度 / Depth：\n外形尺寸：\n边框结构：\n表面处理：\n数量：\n交付地：\n测试要求：\n`);
+const mailBody = encodeURIComponent(`您好，我想咨询金属蜂窝定制。\n\n联系人：\n电话：\n用途：\n材质：\n孔径 / Cell Size：\n箔厚 / Foil Thickness：\n蜂窝厚度 / Depth：\n外形尺寸：\n边框结构：\n表面处理：\n数量：\n`);
 const mailto = `mailto:${siteInfo.email}?subject=${mailSubject}&body=${mailBody}`;
 ---
 <BaseLayout title={pageSEO.contact.title} description={pageSEO.contact.description} canonical={pageSEO.contact.canonical}>
@@ -50,14 +52,23 @@ const mailto = `mailto:${siteInfo.email}?subject=${mailSubject}&body=${mailBody}
     </div>
   </section>
 
-  <section class="section section--muted">
-    <div class="container form-note">
-      <ContactBlock />
-      <p>当前为静态站，无后端表单接口，因此不提供假提交表单。请使用邮箱链接发送询价，或在后续接入真实表单服务后再启用在线表单。</p>
+  <section class="section">
+    <div class="container">
+      <AmapLocation />
     </div>
   </section>
 
-  <CTASection title="提交图纸或参数后沟通更高效" lead="建议一次性提供用途、材料、尺寸、孔径、厚度、数量和测试要求。" />
+  <section class="section section--muted">
+    <div class="container">
+      <InquiryForm />
+      <div class="form-note">
+        <ContactBlock />
+        <p>在线询价用于评估产品方案和后续商务联系。若在线提交暂时不可用，可通过电话或邮箱发送图纸和参数。</p>
+      </div>
+    </div>
+  </section>
+
+  <CTASection title="提交图纸或参数后沟通更高效" lead="建议提供用途、材料、尺寸、孔径、厚度和数量，其他信息可在后续沟通中补充。" />
 </BaseLayout>
 
 <style>
@@ -121,6 +132,7 @@ const mailto = `mailto:${siteInfo.email}?subject=${mailSubject}&body=${mailBody}
     display: grid;
     gap: 16px;
     max-width: 900px;
+    margin-top: 24px;
   }
 
   .form-note > p {

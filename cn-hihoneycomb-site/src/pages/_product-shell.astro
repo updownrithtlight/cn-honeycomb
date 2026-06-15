@@ -1,11 +1,14 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumb from "../components/Breadcrumb.astro";
 import ParameterTable from "../components/ParameterTable.astro";
 import FAQ from "../components/FAQ.astro";
 import ProductCard from "../components/ProductCard.astro";
 import CTASection from "../components/CTASection.astro";
+import TechnicalArticleCard from "../components/TechnicalArticleCard.astro";
 import { products, productsBySlug } from "../data/products";
+import { technicalByProductSlug } from "../data/technical";
 import { inquiryFields, performanceNotice, siteInfo } from "../data/site";
 
 const { slug } = Astro.props;
@@ -63,6 +66,10 @@ const fallbackRelated = products
   .filter((item) => item.slug !== product.slug && !relatedProducts.some((related) => related.slug === item.slug))
   .slice(0, Math.max(0, 3 - relatedProducts.length));
 const relatedCards = [...relatedProducts, ...fallbackRelated].slice(0, 3);
+const technicalArticles = await getCollection("technical");
+const relatedTechnicalArticles = (technicalByProductSlug[product.slug] ?? [])
+  .map((articleSlug) => technicalArticles.find((article) => article.data.slug === articleSlug))
+  .filter(Boolean);
 
 const productJsonLd = {
   "@context": "https://schema.org",
@@ -70,7 +77,7 @@ const productJsonLd = {
   name: product.name,
   description: product.description,
   url: `${siteInfo.domain}${product.slug}/`,
-  image: `${siteInfo.domain}images/placeholder-metal-honeycomb.svg`,
+  image: `${siteInfo.domain}${product.image.replace(/^\//, "")}`,
   brand: {
     "@type": "Brand",
     name: siteInfo.siteName
@@ -119,12 +126,27 @@ const productJsonLd = {
           </div>
         </div>
         <figure>
-          <img src="/images/placeholder-metal-honeycomb.svg" alt={`${product.name}产品结构占位图`} loading="lazy" />
-          <figcaption>占位图：后续替换为{product.name}真实产品图片。</figcaption>
+          <img src={product.image} alt={`${product.name}产品实拍图`} width="1254" height="1254" loading="eager" decoding="async" />
         </figure>
       </div>
     </div>
   </section>
+
+  {product.images.length > 1 && (
+    <section class="section product-gallery-section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Product Gallery</p>
+          <h2 class="section-title">产品实拍图</h2>
+        </div>
+        <div class="product-gallery">
+          {product.images.map((image, index) => (
+            <figure><img src={image} alt={`${product.name}产品实拍图 ${index + 1}`} width="1254" height="1254" loading="lazy" decoding="async" /></figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 
   <section class="section">
     <div class="container two-column">
@@ -184,6 +206,24 @@ const productJsonLd = {
     </div>
   </section>
 
+  {relatedTechnicalArticles.length > 0 && (
+    <section class="section section--muted">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Technical Articles</p>
+          <h2 class="section-title">相关技术文章</h2>
+          <p class="section-lead">进一步了解选型参数、应用原理、制造检验和询价信息。</p>
+        </div>
+        <div class="technical-grid">
+          {relatedTechnicalArticles.map((article) => <TechnicalArticleCard article={article} />)}
+        </div>
+        <div class="button-row">
+          <a class="button button--ghost" href="/technical/">查看全部技术文章</a>
+        </div>
+      </div>
+    </section>
+  )}
+
   <section class="section">
     <div class="container">
       <div class="section-head">
@@ -203,7 +243,7 @@ const productJsonLd = {
       </div>
       <div class="grid grid--3">
         {relatedCards.map((item) => (
-          <ProductCard title={item.name} href={`/${item.slug}/`} description={item.description} />
+          <ProductCard title={item.name} href={`/${item.slug}/`} description={item.description} image={item.image} />
         ))}
       </div>
     </div>
@@ -219,7 +259,7 @@ const productJsonLd = {
     </div>
   </section>
 
-  <CTASection title={`咨询${product.name}定制`} lead="请提供用途、材质、孔径、箔厚、蜂窝厚度、外形尺寸、边框结构、图纸或草图、数量和测试要求。" />
+  <CTASection title={`咨询${product.name}定制`} lead="请提供用途、材质、孔径、箔厚、蜂窝厚度、外形尺寸、边框结构、图纸或草图和数量。" />
 </BaseLayout>
 
 <style>
@@ -259,15 +299,10 @@ const productJsonLd = {
   }
 
   figure img {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-  }
-
-  figcaption {
-    padding: 12px 14px;
-    color: var(--color-muted);
-    font-size: 13px;
+    height: auto;
+    object-fit: contain;
   }
 
   .keyword-list,
@@ -347,10 +382,37 @@ const productJsonLd = {
     font-weight: 700;
   }
 
+  .product-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .technical-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .product-gallery figure {
+    overflow: hidden;
+    padding: 12px;
+    background: #f7f8fa;
+  }
+
+  .product-gallery figure img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
   @media (max-width: 900px) {
     .product-hero-grid,
     .two-column {
       grid-template-columns: 1fr;
     }
+
+    .product-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .technical-grid { grid-template-columns: 1fr; }
   }
 </style>

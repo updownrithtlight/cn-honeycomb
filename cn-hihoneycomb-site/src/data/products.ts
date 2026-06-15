@@ -9,6 +9,8 @@ export type ProductParameter = {
 
 export type ProductItem = {
   slug: string;
+  image: string;
+  images: string[];
   name: string;
   title: string;
   h1: string;
@@ -30,25 +32,17 @@ const highTemperatureMaterials = ["GH3536 / Hastelloy X", "Haynes 214", "Inconel
 const commonParameters: ProductParameter[] = [
   { label: "用途", value: "按应用场景确认屏蔽、通风、整流、密封或结构需求。" },
   { label: "孔径 / Cell Size", value: "根据图纸、样品或项目要求沟通。" },
-  { label: "箔厚 / Foil Thickness", value: `常见箔厚包括 ${companyProfile.foilThickness.join("、")}，具体根据材料、结构强度和加工方式确认。` },
+  { label: "箔厚 / Foil Thickness", value: "根据材料、结构强度、加工方式和图纸要求确认。" },
   { label: "蜂窝厚度 / Depth", value: "根据安装空间、性能目标和结构要求确认。" },
   { label: "外形尺寸", value: "支持按图纸、草图或样品沟通。" },
   { label: "性能说明", value: performanceNotice }
 ];
 
-const windTunnelParameters: ProductParameter[] = [
-  ...commonParameters,
-  { label: "风洞拼焊能力", value: "最大拼焊长度可达 3200mm，俯仰角、偏航角可控制在 ±0.1°以内，具体以图纸和工艺评估为准。" }
-];
-
-const sealParameters: ProductParameter[] = [
-  ...commonParameters,
-  { label: "芯格尺寸", value: "航空航天发动机及燃气轮机相关蜂窝芯格尺寸可围绕 0.8-6mm 需求沟通。" }
-];
-
 export const products: ProductItem[] = [
   {
     slug: "emi-shielded-honeycomb-vent",
+    image: "/images/products/catalog/waveguide-egez5067.webp",
+    images: ["/images/products/catalog/waveguide-egez5067.webp", "/images/products/catalog/waveguide-figq7620.webp", "/images/products/catalog/waveguide-fyty1015.webp", "/images/products/catalog/waveguide-bmga3265.webp"],
     name: "EMI/RFI 屏蔽蜂窝通风板",
     title: "EMI屏蔽蜂窝通风板｜RFI屏蔽通风窗定制 | 恒实蜂窝",
     h1: "EMI/RFI 屏蔽蜂窝通风板",
@@ -64,6 +58,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "waveguide-honeycomb-vent",
+    image: "/images/products/catalog/waveguide-gthd2721.webp",
+    images: ["/images/products/catalog/waveguide-gthd2721.webp", "/images/products/catalog/waveguide-crqk5457.webp", "/images/products/catalog/waveguide-ctix0285.webp", "/images/products/catalog/waveguide-dvlc6303.webp", "/images/products/catalog/waveguide-focv4966.webp", "/images/products/catalog/waveguide-jdfu8950.webp"],
     name: "蜂窝通风波导板",
     title: "蜂窝通风波导板｜屏蔽通风口定制 | 恒实蜂窝",
     h1: "蜂窝通风波导板",
@@ -79,6 +75,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "stainless-steel-honeycomb-core",
+    image: "/images/products/catalog/core-cbgf7684.webp",
+    images: ["/images/products/catalog/core-cbgf7684.webp", "/images/products/catalog/core-elod5064.webp", "/images/products/catalog/core-img_7081.webp", "/images/products/catalog/core-pnjp5611.webp", "/images/products/catalog/core-qalp4613.webp", "/images/products/catalog/core-xapa3646.webp"],
     name: "不锈钢蜂窝芯",
     title: "不锈钢蜂窝芯｜304/316金属蜂窝芯定制 | 恒实蜂窝",
     h1: "不锈钢蜂窝芯",
@@ -94,6 +92,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "copper-honeycomb-core",
+    image: "/images/products/catalog/core-bbsv6655.webp",
+    images: ["/images/products/catalog/core-bbsv6655.webp", "/images/products/catalog/core-kxvy8417.webp"],
     name: "铜蜂窝芯 / 黄铜蜂窝芯",
     title: "铜蜂窝芯｜黄铜蜂窝芯定制 | 恒实蜂窝",
     h1: "铜蜂窝芯 / 黄铜蜂窝芯",
@@ -109,6 +109,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "aluminum-honeycomb-core",
+    image: "/images/products/catalog/core-qxtk1778.webp",
+    images: ["/images/products/catalog/core-qxtk1778.webp", "/images/products/catalog/core-tvdm8843.webp", "/images/products/catalog/core-uewq0407.webp"],
     name: "铝蜂窝芯",
     title: "铝蜂窝芯｜铝合金蜂窝芯定制 | 恒实蜂窝",
     h1: "铝蜂窝芯",
@@ -124,6 +126,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "airflow-straightener",
+    image: "/images/products/catalog/air-flow-eixo2102.webp",
+    images: ["/images/products/catalog/air-flow-eixo2102.webp", "/images/products/catalog/air-flow-egpz2801.webp", "/images/products/catalog/air-flow-gaqj1911.webp"],
     name: "气流整流蜂窝",
     title: "气流整流蜂窝｜蜂窝整流器定制 | 恒实蜂窝",
     h1: "气流整流蜂窝",
@@ -139,6 +143,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "wind-tunnel-honeycomb",
+    image: "/images/products/catalog/air-flow-dyqk5468.webp",
+    images: ["/images/products/catalog/air-flow-dyqk5468.webp", "/images/products/catalog/air-flow-egpz2801.webp"],
     name: "风洞蜂窝",
     title: "风洞蜂窝｜风洞流场整流蜂窝定制 | 恒实蜂窝",
     h1: "风洞蜂窝",
@@ -147,13 +153,15 @@ export const products: ProductItem[] = [
     applications: ["风洞试验", "水洞试验", "流场测试", "航空航天实验"],
     materials: [...stainlessMaterials, "铝", "碳钢"],
     processes: commonProcesses,
-    parameters: windTunnelParameters,
+    parameters: commonParameters,
     inquiryInfo: inquiryFields,
     faq: productFaqs["wind-tunnel-honeycomb"],
     related: ["airflow-straightener", "stainless-steel-honeycomb-core", "aluminum-honeycomb-core"]
   },
   {
     slug: "honeycomb-seal",
+    image: "/images/products/catalog/seal-dkcr4969.webp",
+    images: ["/images/products/catalog/seal-dkcr4969.webp", "/images/products/catalog/seal-avtc6814.webp", "/images/products/catalog/seal-ehyd5547.webp", "/images/products/catalog/seal-fxgm8934.webp", "/images/products/catalog/seal-mhya4787.webp", "/images/products/catalog/seal-nzzp3740.webp", "/images/products/catalog/seal-tzxf5658.webp"],
     name: "蜂窝密封件",
     title: "蜂窝密封件｜汽轮机与燃气轮机密封定制 | 恒实蜂窝",
     h1: "蜂窝密封件",
@@ -162,13 +170,15 @@ export const products: ProductItem[] = [
     applications: ["汽轮机密封", "燃气轮机密封", "压缩机密封"],
     materials: [...stainlessMaterials, ...highTemperatureMaterials],
     processes: ["拼焊", "激光焊", "真空钎焊", "线切割", "按图纸定制"],
-    parameters: sealParameters,
+    parameters: commonParameters,
     inquiryInfo: inquiryFields,
     faq: productFaqs["honeycomb-seal"],
     related: ["stainless-steel-honeycomb-core", "custom-metal-honeycomb"]
   },
   {
     slug: "emi-shielded-glass",
+    image: "/images/products/emi-shielded-honeycomb-vent-02.webp",
+    images: ["/images/products/emi-shielded-honeycomb-vent-02.webp"],
     name: "EMI 屏蔽玻璃 / 屏蔽视窗",
     title: "EMI屏蔽玻璃｜屏蔽视窗与显示窗口定制 | 恒实蜂窝",
     h1: "EMI 屏蔽玻璃 / 屏蔽视窗",
@@ -184,6 +194,8 @@ export const products: ProductItem[] = [
   },
   {
     slug: "custom-metal-honeycomb",
+    image: "/images/products/catalog/core-wdaz4476.webp",
+    images: ["/images/products/catalog/core-wdaz4476.webp", "/images/products/catalog/core-trky0410.webp", "/images/products/catalog/core-pnjp5611.webp", "/images/products/catalog/core-uewq0407.webp"],
     name: "金属蜂窝定制件",
     title: "金属蜂窝定制件 | 按图纸定制 | 恒实蜂窝",
     h1: "金属蜂窝定制件",

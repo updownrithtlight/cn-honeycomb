@@ -1,0 +1,114 @@
+---
+const provider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER ?? "";
+const analyticsId = import.meta.env.PUBLIC_ANALYTICS_ID ?? "";
+const enabled = Boolean(provider && analyticsId);
+---
+{enabled && (
+  <div class="consent" data-consent hidden>
+    <p>本站仅在您同意后启用访问统计，用于改进页面和询盘流程。不会发送表单内容或联系方式。</p>
+    <div>
+      <button type="button" class="button" data-consent-accept>同意统计</button>
+      <button type="button" class="button button--ghost" data-consent-reject>拒绝</button>
+      <a href="/privacy/">隐私说明</a>
+    </div>
+  </div>
+)}
+
+<script define:vars={{ provider, analyticsId, enabled }}>
+  const storageKey = "hengshi-analytics-consent";
+  const consent = document.querySelector("[data-consent]");
+
+  const loadAnalytics = () => {
+    if (!enabled || document.querySelector("[data-site-analytics]")) return;
+
+    if (provider === "ga4") {
+      const loader = document.createElement("script");
+      loader.async = true;
+      loader.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(analyticsId)}`;
+      loader.dataset.siteAnalytics = "ga4";
+      document.head.append(loader);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", analyticsId, { anonymize_ip: true });
+    }
+
+    if (provider === "baidu") {
+      window._hmt = window._hmt || [];
+      const loader = document.createElement("script");
+      loader.async = true;
+      loader.src = `https://hm.baidu.com/hm.js?${encodeURIComponent(analyticsId)}`;
+      loader.dataset.siteAnalytics = "baidu";
+      document.head.append(loader);
+    }
+  };
+
+  const track = (name, detail = {}) => {
+    if (localStorage.getItem(storageKey) !== "accepted") return;
+    const safeDetail = { page: location.pathname, destination: detail.destination || "" };
+    if (provider === "ga4" && window.gtag) window.gtag("event", name, safeDetail);
+    if (provider === "baidu" && window._hmt) window._hmt.push(["_trackEvent", "site", name, safeDetail.page]);
+  };
+
+  if (enabled) {
+    const state = localStorage.getItem(storageKey);
+    if (state === "accepted") loadAnalytics();
+    if (!state && consent) consent.hidden = false;
+
+    consent?.querySelector("[data-consent-accept]")?.addEventListener("click", () => {
+      localStorage.setItem(storageKey, "accepted");
+      consent.hidden = true;
+      loadAnalytics();
+    });
+    consent?.querySelector("[data-consent-reject]")?.addEventListener("click", () => {
+      localStorage.setItem(storageKey, "rejected");
+      consent.hidden = true;
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if (!link) return;
+    if (link.href.startsWith("tel:")) track("phone_click");
+    if (link.href.startsWith("mailto:")) track("email_click");
+    if (link.classList.contains("button")) track("cta_click", { destination: link.pathname || "" });
+  });
+  document.addEventListener("site:conversion", () => track("inquiry_success"));
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 100;
+    width: min(420px, calc(100% - 36px));
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: 0 16px 50px rgba(11, 42, 74, 0.2);
+  }
+
+  .consent p {
+    margin: 0 0 14px;
+    color: var(--color-text);
+    font-size: 14px;
+  }
+
+  .consent div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .consent .button {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+
+  .consent a {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+</style>

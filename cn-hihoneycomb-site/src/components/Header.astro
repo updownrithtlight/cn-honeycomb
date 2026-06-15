@@ -12,12 +12,46 @@ import { siteInfo } from "../data/site";
         <small>{siteInfo.brandEnglish}</small>
       </span>
     </a>
-    <nav class="nav" aria-label="主导航">
-      {mainNavigation.map((item) => <a href={item.href}>{item.label}</a>)}
-    </nav>
-    <LanguageSwitcher />
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+      <span class="menu-icon" aria-hidden="true"></span>
+      <span class="menu-label">菜单</span>
+    </button>
+    <div class="navigation-shell" id="primary-navigation">
+      <nav class="nav" aria-label="主导航">
+        {mainNavigation.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <LanguageSwitcher />
+    </div>
   </div>
 </header>
+
+<script>
+  const header = document.querySelector(".site-header");
+  const toggle = header?.querySelector(".menu-toggle");
+  const navigation = header?.querySelector(".navigation-shell");
+
+  const closeMenu = () => {
+    toggle?.setAttribute("aria-expanded", "false");
+    navigation?.classList.remove("is-open");
+  };
+
+  toggle?.addEventListener("click", () => {
+    const expanded = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!expanded));
+    navigation?.classList.toggle("is-open", !expanded);
+  });
+
+  navigation?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+      toggle?.focus();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (header && event.target instanceof Node && !header.contains(event.target)) closeMenu();
+  });
+</script>
 
 <style>
   .site-header {
@@ -30,6 +64,7 @@ import { siteInfo } from "../data/site";
   }
 
   .header-inner {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -42,6 +77,13 @@ import { siteInfo } from "../data/site";
     align-items: center;
     gap: 12px;
     min-width: 205px;
+  }
+
+  .navigation-shell {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-width: 0;
   }
 
   .brand-logo {
@@ -84,17 +126,113 @@ import { siteInfo } from "../data/site";
     color: var(--color-primary);
   }
 
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    color: var(--color-primary);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .menu-icon,
+  .menu-icon::before,
+  .menu-icon::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .menu-icon {
+    position: relative;
+  }
+
+  .menu-icon::before,
+  .menu-icon::after {
+    position: absolute;
+    left: 0;
+    content: "";
+  }
+
+  .menu-icon::before {
+    top: -6px;
+  }
+
+  .menu-icon::after {
+    top: 6px;
+  }
+
   @media (max-width: 1040px) {
     .header-inner {
-      align-items: flex-start;
+      min-height: 68px;
+      gap: 12px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .navigation-shell {
+      position: absolute;
+      top: calc(100% + 1px);
+      right: 0;
+      left: 0;
+      display: none;
+      align-items: stretch;
       flex-direction: column;
-      padding: 16px 0;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid var(--color-border);
+      border-top: 0;
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .navigation-shell.is-open {
+      display: flex;
     }
 
     .nav {
+      display: grid;
       width: 100%;
-      overflow-x: auto;
-      padding-bottom: 4px;
+      gap: 0;
+      white-space: normal;
+    }
+
+    .nav a {
+      min-height: 46px;
+      padding: 11px 4px;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+
+  @media (max-width: 420px) {
+    .brand small {
+      display: none;
+    }
+
+    .menu-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
     }
   }
 </style>

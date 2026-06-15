@@ -1,0 +1,459 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../../components/Breadcrumb.astro";
+import TechnicalArticleCard from "../../../components/TechnicalArticleCard.astro";
+import ProductCard from "../../../components/ProductCard.astro";
+import CTASection from "../../../components/CTASection.astro";
+import { siteInfo, inquiryFields } from "../../../data/site";
+import { productsBySlug } from "../../../data/products";
+import { technicalArticleConfig } from "../../../data/technical";
+import { estimateReadingMinutes, extractArticleFaqs, formatChineseDate } from "../../../utils/technical";
+
+export async function getStaticPaths() {
+  const articles = await getCollection("technical");
+  return articles.map((article) => ({
+    params: { slug: article.data.slug },
+    props: { article, articles }
+  }));
+}
+
+const { article, articles } = Astro.props;
+const { Content } = await render(article);
+const config = technicalArticleConfig[article.data.slug];
+const canonical = `${siteInfo.domain}technical/${article.data.slug}/`;
+const faqs = extractArticleFaqs(article.body);
+const readingMinutes = estimateReadingMinutes(article.body);
+const relatedProducts = (config?.relatedProducts ?? [])
+  .filter((slug) => slug !== "products")
+  .map((slug) => productsBySlug[slug])
+  .filter(Boolean);
+const relatedArticles = (config?.relatedArticles ?? [])
+  .map((slug) => articles.find((item) => item.data.slug === slug))
+  .filter(Boolean);
+const image = config?.image ?? "/images/product-honeycomb-illustration.svg";
+const absoluteImage = `${siteInfo.domain}${image.replace(/^\//, "")}`;
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: article.data.title,
+  description: article.data.description,
+  inLanguage: "zh-CN",
+  datePublished: article.data.publishDate,
+  dateModified: article.data.updatedDate,
+  mainEntityOfPage: canonical,
+  image: absoluteImage,
+  author: {
+    "@type": "Organization",
+    name: siteInfo.siteName,
+    url: siteInfo.domain
+  },
+  publisher: {
+    "@type": "Organization",
+    name: siteInfo.siteName,
+    url: siteInfo.domain,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteInfo.domain}images/brand/hengshi-logo.jpg`
+    }
+  },
+  about: article.data.tags
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "首页", item: siteInfo.domain },
+    { "@type": "ListItem", position: 2, name: "技术文章", item: `${siteInfo.domain}technical/` },
+    { "@type": "ListItem", position: 3, name: article.data.title, item: canonical }
+  ]
+};
+
+const faqJsonLd = faqs.length
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer
+        }
+      }))
+    }
+  : null;
+
+const jsonLd = [articleJsonLd, breadcrumbJsonLd, ...(faqJsonLd ? [faqJsonLd] : [])];
+---
+<BaseLayout
+  title={`${article.data.title} | 恒实蜂窝`}
+  description={article.data.description}
+  canonical={canonical}
+  image={absoluteImage}
+  ogType="article"
+  jsonLd={jsonLd}
+  includeDefaultBreadcrumb={false}
+>
+  <article>
+    <header class="article-hero">
+      <div class="container">
+        <Breadcrumb items={[{ href: "/technical/", label: "技术文章" }, { label: article.data.title }]} />
+        <div class="article-heading">
+          <div class="article-meta">
+            <span>{article.data.category}</span>
+            <time datetime={article.data.publishDate}>发布于 {formatChineseDate(article.data.publishDate)}</time>
+            <span>约 {readingMinutes} 分钟阅读</span>
+          </div>
+          <h1>{article.data.title}</h1>
+          <p class="article-summary">{article.data.description}</p>
+          <ul class="article-tags" aria-label="文章标签">
+            {article.data.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <section class="article-intro">
+      <div class="container intro-grid">
+        <div>
+          <p class="eyebrow">AI Summary</p>
+          <h2>工程摘要</h2>
+          <p>{article.data.description}</p>
+        </div>
+        <div>
+          <strong>适合谁阅读</strong>
+          <p>{article.data.audience}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container article-layout">
+        <div class="article-body">
+          <figure class="article-inline-image">
+            <img src={image} alt={config?.imageAlt ?? article.data.title} width="720" height="720" loading="eager" decoding="async" />
+            <figcaption>{config?.imageAlt ?? article.data.title}，图片用于辅助说明相关产品或质量管理场景。</figcaption>
+          </figure>
+          <Content />
+        </div>
+        <aside class="article-sidebar">
+          <div>
+            <h2>询价通常需要提供</h2>
+            <ul>
+              {inquiryFields.slice(0, 8).map((field) => <li>{field}</li>)}
+            </ul>
+            <a class="button" href="/contact/">提交图纸或参数</a>
+          </div>
+          <div>
+            <h2>阅读说明</h2>
+            <p>文章用于工程选型和采购沟通。材料、性能与检测结论应以图纸、技术协议、样件或项目报告为准。</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {relatedProducts.length > 0 && (
+      <section class="section section--muted">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">Related Products</p>
+            <h2 class="section-title">相关产品</h2>
+          </div>
+          <div class="grid grid--3">
+            {relatedProducts.map((product) => (
+              <ProductCard title={product.name} href={`/${product.slug}/`} description={product.description} image={product.image} />
+            ))}
+          </div>
+          {config?.relatedProducts.includes("products") && (
+            <div class="button-row"><a class="button button--ghost" href="/products/">查看全部产品</a></div>
+          )}
+        </div>
+      </section>
+    )}
+
+    {relatedArticles.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">Further Reading</p>
+            <h2 class="section-title">相关阅读</h2>
+          </div>
+          <div class="related-article-grid">
+            {relatedArticles.map((item) => <TechnicalArticleCard article={item} />)}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <CTASection title="把图纸或参数发给恒实蜂窝，获取定制方案与报价" lead="请说明用途、材料、孔径、箔厚、蜂窝厚度、外形尺寸、数量、工作环境和检测要求。" />
+  </article>
+</BaseLayout>
+
+<style>
+  .article-hero {
+    padding: 38px 0 66px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-soft);
+  }
+
+  .article-heading {
+    max-width: 920px;
+    margin-top: 28px;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  .article-meta span:first-child {
+    color: var(--color-accent-dark);
+    font-weight: 800;
+  }
+
+  h1 {
+    max-width: 860px;
+    margin: 16px 0;
+    color: var(--color-primary);
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.18;
+  }
+
+  .article-summary {
+    max-width: 820px;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 18px;
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .article-tags li {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .article-intro {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+    gap: 40px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  .intro-grid h2 {
+    margin: 4px 0 8px;
+    font-size: 24px;
+  }
+
+  .intro-grid p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .intro-grid strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+
+  .article-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 54px;
+    align-items: start;
+  }
+
+  .article-body {
+    min-width: 0;
+    color: var(--color-text);
+    font-size: 17px;
+  }
+
+  .article-inline-image {
+    float: right;
+    width: 300px;
+    margin: 0 0 22px 30px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .article-inline-image img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #f4f6f8;
+  }
+
+  .article-inline-image figcaption {
+    padding: 9px 11px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .article-body :global(h2) {
+    clear: both;
+    margin: 48px 0 16px;
+    color: var(--color-primary);
+    font-size: clamp(25px, 3vw, 32px);
+    line-height: 1.3;
+  }
+
+  .article-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .article-body :global(h3) {
+    margin: 32px 0 12px;
+    color: var(--color-primary);
+    font-size: 21px;
+  }
+
+  .article-body :global(p) {
+    margin: 0 0 18px;
+  }
+
+  .article-body :global(ul),
+  .article-body :global(ol) {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 22px;
+    padding-left: 24px;
+  }
+
+  .article-body :global(blockquote) {
+    margin: 24px 0;
+    padding: 16px 20px;
+    border-left: 4px solid var(--color-accent);
+    background: var(--color-bg-soft);
+    color: var(--color-primary);
+  }
+
+  .article-body :global(table) {
+    display: table;
+    width: 100%;
+    margin: 22px 0 30px;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  .article-body :global(th),
+  .article-body :global(td) {
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .article-body :global(th) {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .article-body :global(tr:nth-child(even) td) {
+    background: var(--color-bg-soft);
+  }
+
+  .article-body :global(pre) {
+    overflow-x: auto;
+    margin: 22px 0;
+    padding: 18px;
+    background: #111827;
+    color: #f9fafb;
+  }
+
+  .article-body :global(code) {
+    font-family: "SFMono-Regular", Consolas, monospace;
+  }
+
+  .article-body :global(a) {
+    color: #0759a5;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .article-sidebar {
+    position: sticky;
+    top: 100px;
+    display: grid;
+    gap: 18px;
+  }
+
+  .article-sidebar > div {
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .article-sidebar h2 {
+    margin: 0 0 14px;
+    color: var(--color-primary);
+    font-size: 19px;
+  }
+
+  .article-sidebar ul {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 18px;
+    padding-left: 18px;
+    color: var(--color-muted);
+  }
+
+  .article-sidebar p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .related-article-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .intro-grid,
+    .article-layout,
+    .related-article-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .article-sidebar {
+      position: static;
+    }
+
+    .article-body {
+      overflow-x: auto;
+    }
+
+    .article-inline-image {
+      float: none;
+      width: min(100%, 260px);
+      margin: 0 auto 26px;
+    }
+  }
+</style>

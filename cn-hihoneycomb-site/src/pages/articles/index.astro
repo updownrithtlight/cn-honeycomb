@@ -1,15 +1,22 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../components/Breadcrumb.astro";
-import { pageSEO } from "../../data/seo";
+import { siteInfo } from "../../data/site";
 ---
-<BaseLayout title={pageSEO.articles.title} description={pageSEO.articles.description} canonical={pageSEO.articles.canonical}>
+<BaseLayout
+  title="技术资料栏目已迁移 | 恒实蜂窝"
+  description="恒实蜂窝技术资料已迁移至技术文章栏目，可继续查看金属蜂窝选型、制造、检测和采购参数文章。"
+  canonical={`${siteInfo.domain}articles/`}
+>
   <section class="section">
     <div class="container">
       <Breadcrumb items={[{ label: "技术资料" }]} />
       <p class="eyebrow">Articles</p>
-      <h1 class="section-title">技术资料</h1>
-      <p class="section-lead">预留技术文章列表，用于后续承接产品选型、材料工艺、应用说明和 SEO 长尾内容。</p>
+      <h1 class="section-title">技术资料已迁移至技术文章栏目</h1>
+      <p class="section-lead">新的技术文章栏目已整理金属蜂窝芯、整流蜂窝、EMI 屏蔽通风板、蜂窝密封、质量体系和询价参数内容。</p>
+      <div class="button-row">
+        <a class="button" href="/technical/">进入技术文章栏目</a>
+      </div>
     </div>
   </section>
 </BaseLayout>

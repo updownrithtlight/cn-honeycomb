@@ -10,9 +10,12 @@ dist/
 !.env.example
 *.log
 
+# Local source images and generated review sheets
+cn-hihoneycomb-site/image-source/
+cn-hihoneycomb-site/*contact-sheet.jpg
+
 # Editor and operating system files
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-

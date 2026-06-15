@@ -14,7 +14,7 @@ export const commonFaqs: FAQItem[] = [
   },
   {
     question: "询价时需要提供哪些信息？",
-    answer: "建议提供用途、材质、孔径 / Cell Size、箔厚 / Foil Thickness、蜂窝厚度 / Depth、外形尺寸、边框结构、表面处理、图纸或草图、数量、交付地和测试要求。",
+    answer: "建议提供用途、材质、孔径 / Cell Size、箔厚 / Foil Thickness、蜂窝厚度 / Depth、外形尺寸、边框结构、表面处理、图纸或草图和数量。",
     tags: ["inquiry"]
   },
   {

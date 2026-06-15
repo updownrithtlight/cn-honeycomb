@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build-and-qa:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cn-hihoneycomb-site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cn-hihoneycomb-site/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run qa
+      - name: Runtime smoke test
+        env:
+          NODE_ENV: development
+          PORT: 4321
+        run: |
+          node server.mjs &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4321/api/health && break
+            sleep 1
+          done
+          test "$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:4321/not-found)" = "404"

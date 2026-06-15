@@ -1,9 +1,24 @@
 services:
   cn-hihoneycomb-site:
+    image: registry.billlvtech.site/cn-hihoneycomb-site:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        PUBLIC_SITE_ORIGIN: ${PUBLIC_SITE_ORIGIN}
+        PUBLIC_TURNSTILE_SITE_KEY: ${PUBLIC_TURNSTILE_SITE_KEY}
+        PUBLIC_AMAP_JS_KEY: ${PUBLIC_AMAP_JS_KEY}
+        PUBLIC_AMAP_SECURITY_JS_CODE: ${PUBLIC_AMAP_SECURITY_JS_CODE}
+        PUBLIC_ANALYTICS_PROVIDER: ${PUBLIC_ANALYTICS_PROVIDER}
+        PUBLIC_ANALYTICS_ID: ${PUBLIC_ANALYTICS_ID}
     container_name: cn-hihoneycomb-site
     ports:
-      - "8088:80"
+      - "127.0.0.1:8088:4321"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4321/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped

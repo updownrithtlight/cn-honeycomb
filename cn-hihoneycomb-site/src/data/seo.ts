@@ -36,8 +36,8 @@ export const pageSEO: Record<string, SEOEntry> = {
   },
   about: {
     title: "关于恒实 | 恒实蜂窝",
-    description: "了解恒实（廊坊）精密机械制造有限公司的生产基地、质量体系、主营业务、材料工艺和金属蜂窝制造能力。",
-    keywords: ["恒实蜂窝", "恒实精密机械", "金属蜂窝厂家", "AS9100金属蜂窝", "GJB9001C蜂窝"],
+    description: "了解恒实（廊坊）精密机械制造有限公司的主营业务、材料工艺和金属蜂窝定制方向。",
+    keywords: ["恒实蜂窝", "恒实精密机械", "金属蜂窝厂家", "金属蜂窝定制"],
     canonical: `${siteInfo.domain}about/`
   },
   contact: {
@@ -48,7 +48,7 @@ export const pageSEO: Record<string, SEOEntry> = {
   },
   articles: {
     title: "技术资料 | 恒实蜂窝",
-    description: "恒实蜂窝技术资料栏目预留产品选型、材料工艺、应用说明和金属蜂窝定制相关内容。",
+    description: "恒实蜂窝技术资料栏目将发布产品选型、材料工艺、应用说明和金属蜂窝定制相关内容。",
     keywords: ["金属蜂窝技术资料", "蜂窝通风波导板选型", "气流整流蜂窝应用"],
     canonical: `${siteInfo.domain}articles/`
   },
