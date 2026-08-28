@@ -47,6 +47,7 @@ const mimeTypes = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".avif": "image/avif",
   ".ico": "image/x-icon"
 };
 
@@ -279,11 +280,18 @@ async function serveStatic(req, res) {
     if (fileStats.isDirectory()) target = join(target, "index.html");
     const content = await readFile(target);
     const extension = extname(target).toLowerCase();
-    const isAsset = target.includes(`${join("dist", "_astro")}`) || /\.(?:css|js|mjs|svg|png|jpe?g|webp|ico|woff2?)$/i.test(target);
+    const isFingerprintedAsset = target.includes(`${join("dist", "_astro")}`);
+    const isStaticAsset = /\.(?:css|js|mjs|svg|png|jpe?g|webp|avif|ico|woff2?)$/i.test(target);
+    const cacheControl = isFingerprintedAsset
+      ? "public, max-age=31536000, immutable"
+      : isStaticAsset
+        ? "public, max-age=604800, stale-while-revalidate=86400"
+        : "no-cache";
     res.writeHead(200, {
       ...securityHeaders,
       "Content-Type": mimeTypes[extension] || "application/octet-stream",
-      "Cache-Control": isAsset ? "public, max-age=31536000, immutable" : "no-cache"
+      "Cache-Control": cacheControl,
+      "Content-Length": content.length
     });
     if (req.method === "HEAD") return res.end();
     return res.end(content);

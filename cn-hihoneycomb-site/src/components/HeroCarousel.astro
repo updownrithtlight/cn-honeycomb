@@ -5,13 +5,26 @@ import { join } from "node:path";
 
 const { slides = [] } = Astro.props as { slides: HeroSlide[] };
 const fallbackImage = "/images/product-honeycomb-illustration.svg";
+const responsiveWidths = [640, 960];
 const resolveImage = (image: string) => {
   const imagePath = join(process.cwd(), "public", image.replace(/^\//, ""));
   return existsSync(imagePath) ? image : fallbackImage;
 };
+const buildSrcset = (image: string, sourceWidth: number) => {
+  const extensionIndex = image.lastIndexOf(".");
+  const base = extensionIndex >= 0 ? image.slice(0, extensionIndex) : image;
+  const extension = extensionIndex >= 0 ? image.slice(extensionIndex) : "";
+  const candidates = responsiveWidths
+    .map((width) => ({ width, image: `${base}-${width}${extension}` }))
+    .filter(({ image }) => existsSync(join(process.cwd(), "public", image.replace(/^\//, ""))));
+  return [...candidates, { width: sourceWidth, image }]
+    .map((candidate) => `${candidate.image} ${candidate.width}w`)
+    .join(", ");
+};
 const resolvedSlides = slides.map((slide) => ({
   ...slide,
-  resolvedImage: resolveImage(slide.image)
+  resolvedImage: resolveImage(slide.image),
+  resolvedSrcset: buildSrcset(resolveImage(slide.image), slide.imageWidth)
 }));
 ---
 <section class="hero-carousel" data-hero-carousel data-interval="5000">
@@ -35,12 +48,17 @@ const resolvedSlides = slides.map((slide) => ({
               <span class="stage-line stage-line--bottom" aria-hidden="true"></span>
               <figure>
                 <img
-                  src={slide.resolvedImage}
+                  src={index === 0 ? slide.resolvedImage : undefined}
+                  srcset={index === 0 ? slide.resolvedSrcset : undefined}
+                  sizes="(max-width: 620px) calc(100vw - 40px), (max-width: 980px) min(calc(100vw - 96px), 460px), 560px"
+                  data-src={slide.resolvedImage}
+                  data-srcset={slide.resolvedSrcset}
                   data-fallback={fallbackImage}
                   alt={slide.imageAlt}
-                  width="1200"
-                  height="820"
+                  width={slide.imageWidth}
+                  height={slide.imageHeight}
                   loading={index === 0 ? "eager" : "lazy"}
+                  fetchpriority={index === 0 ? "high" : "low"}
                   decoding="async"
                 />
               </figure>
@@ -83,18 +101,36 @@ const resolvedSlides = slides.map((slide) => ({
     const interval = Number(carousel.getAttribute("data-interval")) || 5000;
     let current = 0;
     let timer = null;
+    let preloadTimer = null;
 
     carousel.querySelectorAll("img[data-fallback]").forEach((image) => {
       image.addEventListener("error", () => {
         const fallback = image.getAttribute("data-fallback");
         if (fallback && image.getAttribute("src") !== fallback) {
+          image.removeAttribute("srcset");
+          image.removeAttribute("data-srcset");
           image.setAttribute("src", fallback);
         }
       }, { once: true });
     });
 
+    const loadSlide = (index) => {
+      const slide = slides[(index + slides.length) % slides.length];
+      const image = slide?.querySelector("img[data-src]");
+      if (!image || image.getAttribute("src")) return;
+      const srcset = image.getAttribute("data-srcset");
+      if (srcset) image.setAttribute("srcset", srcset);
+      image.setAttribute("src", image.getAttribute("data-src"));
+    };
+
+    const preloadNext = () => {
+      if (preloadTimer) window.clearTimeout(preloadTimer);
+      preloadTimer = window.setTimeout(() => loadSlide(current + 1), Math.min(2500, interval / 2));
+    };
+
     const setActive = (index) => {
       current = (index + slides.length) % slides.length;
+      loadSlide(current);
       slides.forEach((slide, slideIndex) => {
         const active = slideIndex === current;
         slide.classList.toggle("is-active", active);
@@ -106,6 +142,7 @@ const resolvedSlides = slides.map((slide) => ({
         dot.setAttribute("aria-selected", active ? "true" : "false");
       });
       if (currentLabel) currentLabel.textContent = String(current + 1).padStart(2, "0");
+      preloadNext();
     };
 
     const stop = () => {
@@ -144,8 +181,13 @@ const resolvedSlides = slides.map((slide) => ({
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         stop();
+        if (preloadTimer) {
+          window.clearTimeout(preloadTimer);
+          preloadTimer = null;
+        }
       } else {
         start();
+        preloadNext();
       }
     });
 

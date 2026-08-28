@@ -1,21 +1,44 @@
 #!/bin/sh
 set -eu
 
-restart_nginx() {
-    systemctl start nginx
-}
+LEGO_BIN=/usr/local/bin/lego
+LEGO_PATH=/etc/lego
+DOMAIN=cn.hihoneycomb.com
+CERTIFICATE="$LEGO_PATH/certificates/$DOMAIN.crt"
+PRIVATE_KEY="$LEGO_PATH/certificates/$DOMAIN.key"
+TOKEN_FILE="${CREDENTIALS_DIRECTORY:-}/cloudflare-token"
 
-trap restart_nginx EXIT
-systemctl stop nginx
-/usr/bin/lego \
-    --path /etc/lego \
+if [ ! -x "$LEGO_BIN" ]; then
+    echo "lego is not installed at $LEGO_BIN" >&2
+    exit 1
+fi
+
+if [ ! -r "$TOKEN_FILE" ]; then
+    echo "Cloudflare systemd credential is unavailable" >&2
+    exit 1
+fi
+
+before_hash=missing
+if [ -f "$CERTIFICATE" ]; then
+    before_hash=$(sha256sum "$CERTIFICATE" | cut -d ' ' -f 1)
+fi
+
+export CF_DNS_API_TOKEN_FILE="$TOKEN_FILE"
+umask 077
+
+"$LEGO_BIN" run \
+    --path "$LEGO_PATH" \
     --email admin@cn.hihoneycomb.com \
-    --domains cn.hihoneycomb.com \
+    --domains "$DOMAIN" \
     --accept-tos \
-    --tls \
-    renew \
-    --days 30
-systemctl start nginx
-trap - EXIT
+    --dns cloudflare
+
+test -s "$CERTIFICATE"
+test -s "$PRIVATE_KEY"
+
+after_hash=$(sha256sum "$CERTIFICATE" | cut -d ' ' -f 1)
 nginx -t
-systemctl reload nginx
+
+if [ "$before_hash" != "$after_hash" ]; then
+    /usr/bin/systemctl reload nginx
+fi

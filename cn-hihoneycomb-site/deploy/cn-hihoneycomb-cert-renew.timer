@@ -5,6 +5,7 @@ Description=Daily certificate renewal check for cn.hihoneycomb.com
 OnCalendar=daily
 RandomizedDelaySec=1h
 Persistent=true
+Unit=cn-hihoneycomb-cert-renew.service
 
 [Install]
 WantedBy=timers.target

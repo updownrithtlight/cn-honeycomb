@@ -5,4 +5,14 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+User=root
+UMask=0077
+LoadCredentialEncrypted=cloudflare-token:/etc/credstore.encrypted/cn-hihoneycomb-cloudflare-token.cred
 ExecStart=/usr/local/sbin/cn-hihoneycomb-cert-renew
+PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/etc/lego
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
