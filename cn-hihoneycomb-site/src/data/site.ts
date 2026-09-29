@@ -5,8 +5,7 @@ export const siteInfo = {
   domain: "https://cn.hihoneycomb.com/",
   englishSite: "https://www.hihoneycomb.com/",
   phone: "17778159135",
-  email: "996085078@qq.com",
-  fallbackEmail: "sales@hihoneycomb.com",
+  email: "sales@hihoneycomb.com",
   address: "河北省廊坊市固安县高新区通达道2号",
   amapPosition: [116.340853, 39.406046] as const,
   description:
